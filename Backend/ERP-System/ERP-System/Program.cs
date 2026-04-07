@@ -78,14 +78,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS
+// ==========================================
+// UPDATED CORS POLICY
+// ==========================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
         policy => policy
-            .AllowAnyOrigin()
+            .WithOrigins("http://localhost:5173") // Aapka exact React URL
             .AllowAnyMethod()
-            .AllowAnyHeader());
+            .AllowAnyHeader()
+            .AllowCredentials()); // Preflight checks ke liye behtar hai
 });
 
 var app = builder.Build();
@@ -101,8 +104,13 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
+
+// CORS hamesha Authentication aur Authorization se pehle hona chahiye
 app.UseCors("AllowReactApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();

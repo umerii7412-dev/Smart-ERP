@@ -4,6 +4,7 @@ using ERP.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERP_System.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260407050004_CreateCategoryTable")]
+    partial class CreateCategoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,11 +63,8 @@ namespace ERP_System.Migrations
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("CurrentBalance")
-                        .HasColumnType("decimal(18,2)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -74,54 +74,18 @@ namespace ERP_System.Migrations
                         new
                         {
                             Id = 1,
-                            BankName = "Cash",
-                            CurrentBalance = 0m
+                            BankName = "Cash"
                         },
                         new
                         {
                             Id = 2,
-                            BankName = "EasyPaisa",
-                            CurrentBalance = 0m
+                            BankName = "EasyPaisa"
                         },
                         new
                         {
                             Id = 3,
-                            BankName = "JazzCash",
-                            CurrentBalance = 0m
+                            BankName = "JazzCash"
                         });
-                });
-
-            modelBuilder.Entity("ERP.API.Models.BankTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("BankId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BankId");
-
-                    b.ToTable("BankTransactions");
                 });
 
             modelBuilder.Entity("ERP.API.Models.Category", b =>
@@ -475,17 +439,6 @@ namespace ERP_System.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ERP.API.Models.BankTransaction", b =>
-                {
-                    b.HasOne("ERP.API.Models.Bank", "Bank")
-                        .WithMany("Transactions")
-                        .HasForeignKey("BankId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bank");
-                });
-
             modelBuilder.Entity("ERP.API.Models.Leave", b =>
                 {
                     b.HasOne("ERP.API.Models.User", "User")
@@ -601,11 +554,6 @@ namespace ERP_System.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ERP.API.Models.Bank", b =>
-                {
-                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("ERP.API.Models.Category", b =>

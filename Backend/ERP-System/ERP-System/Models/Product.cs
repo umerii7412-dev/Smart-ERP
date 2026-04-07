@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation; // Yeh add karein
 
 namespace ERP.API.Models
 {
@@ -11,10 +13,6 @@ namespace ERP.API.Models
         [StringLength(200)]
         public string Name { get; set; }
 
-        // --- Yeh Line Add Karein ---
-        [StringLength(100)]
-        public string Category { get; set; }
-
         public string Description { get; set; }
 
         [Required]
@@ -22,5 +20,12 @@ namespace ERP.API.Models
 
         [Required]
         public decimal Price { get; set; }
+
+        [Required]
+        public int CategoryId { get; set; } // Foreign Key
+
+        [ForeignKey("CategoryId")]
+        [ValidateNever] // 1. Yeh attribute validation ko rok dega
+        public Category? Category { get; set; } // 2. '?' lagane se error khatam ho jayega
     }
 }

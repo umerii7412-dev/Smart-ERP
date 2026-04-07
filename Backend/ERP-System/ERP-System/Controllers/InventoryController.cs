@@ -1,5 +1,6 @@
 ﻿using ERP.API.Data;
 using ERP.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace ERP.API.Controllers
 {
+  
     [Route("api/[controller]")]
     [ApiController]
     public class InventoryController : ControllerBase
@@ -21,7 +23,8 @@ namespace ERP.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
-            var products = await _context.Products.ToListAsync();
+            // .Include use karne se Category ka data bhi saath ayega
+            var products = await _context.Products.Include(p => p.Category).ToListAsync();
             return Ok(products);
         }
 
@@ -81,5 +84,6 @@ namespace ERP.API.Controllers
         {
             return _context.Products.Any(e => e.Id == id);
         }
+
     }
 }

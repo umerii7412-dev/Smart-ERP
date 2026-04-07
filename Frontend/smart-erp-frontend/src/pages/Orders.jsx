@@ -10,12 +10,14 @@ const Orders = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const [newOrder, setNewOrder] = useState({
     customerId: '',
     bankId: '',
     paymentStatus: 'Paid',
-    taxAmount: 0,
+    taxPercentage: 0,
     totalAmount: 0,
     items: [] 
   });
@@ -28,7 +30,6 @@ const Orders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // Swagger: GET /api/Order
       const res = await api.get('/Order');
       setOrders(res.data);
     } catch (err) { 
@@ -41,7 +42,6 @@ const Orders = () => {
 
   const fetchDropdownData = async () => {
     try {
-      // Swagger ke exact routes use kiye hain
       const [custRes, bankRes, prodRes] = await Promise.all([
         api.get('/Customer'),
         api.get('/Bank'),
@@ -52,7 +52,6 @@ const Orders = () => {
       setProducts(prodRes.data);
     } catch (err) { 
       console.error("Dropdown data error:", err); 
-      // Toast nahi dikhaya taake user disturb na ho agar koi ek API slow ho
     }
   };
 
@@ -65,7 +64,7 @@ const Orders = () => {
 
   const removeItem = (index) => {
     const updatedItems = newOrder.items.filter((_, i) => i !== index);
-    calculateTotal(updatedItems, newOrder.taxAmount);
+    calculateTotal(updatedItems, newOrder.taxPercentage);
   };
 
   const handleItemChange = (index, field, value) => {
@@ -82,21 +81,24 @@ const Orders = () => {
       updatedItems[index][field] = value;
     }
 
-    calculateTotal(updatedItems, newOrder.taxAmount);
+    calculateTotal(updatedItems, newOrder.taxPercentage);
   };
 
-  const calculateTotal = (items, tax) => {
+  const calculateTotal = (items, taxPercentage) => {
     const subtotal = items.reduce((sum, item) => {
       const price = parseFloat(item.unitPrice) || 0;
       const qty = parseInt(item.quantity) || 0;
       return sum + (qty * price);
     }, 0);
 
-    const taxVal = parseFloat(tax) || 0;
+    const taxVal = parseFloat(taxPercentage) || 0;
+    const taxAmount = (subtotal * taxVal) / 100;
+    
     setNewOrder(prev => ({
       ...prev,
       items: items,
-      totalAmount: (subtotal + taxVal).toFixed(2)
+      taxPercentage: taxPercentage,
+      totalAmount: (subtotal + taxAmount).toFixed(2)
     }));
   };
 
@@ -106,11 +108,14 @@ const Orders = () => {
     if (!newOrder.customerId || !newOrder.bankId) return toast.error("Customer aur Bank select karein!");
 
     try {
+      const subtotal = newOrder.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+      const taxAmt = (subtotal * parseFloat(newOrder.taxPercentage)) / 100;
+
       const dataToSubmit = {
         customerId: parseInt(newOrder.customerId),
         bankId: parseInt(newOrder.bankId),
         paymentStatus: newOrder.paymentStatus,
-        taxAmount: parseFloat(newOrder.taxAmount),
+        taxAmount: taxAmt,
         totalAmount: parseFloat(newOrder.totalAmount),
         items: newOrder.items.map(item => ({
           productId: parseInt(item.productId),
@@ -122,13 +127,17 @@ const Orders = () => {
       await api.post('/Order/place-order', dataToSubmit);
       toast.success("Order Successfully Placed!");
       setShowModal(false);
-      // Reset Form
-      setNewOrder({ customerId: '', bankId: '', paymentStatus: 'Paid', taxAmount: 0, totalAmount: 0, items: [] });
+      setNewOrder({ customerId: '', bankId: '', paymentStatus: 'Paid', taxPercentage: 0, totalAmount: 0, items: [] });
       fetchOrders();
     } catch (err) { 
       console.error(err);
       toast.error(err.response?.data || "Order fail ho gaya"); 
     }
+  };
+
+  const openDetails = (order) => {
+    setSelectedOrder(order);
+    setShowDetailsModal(true);
   };
 
   return (
@@ -168,10 +177,14 @@ const Orders = () => {
                   <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="p-4 font-mono text-blue-600 font-bold">#ORD-{order.id}</td>
                     <td className="p-4">
-                      <div className="font-semibold text-slate-700">{order.customer?.name || "Walk-in Customer"}</div>
+                      <div className="font-semibold text-slate-700">
+                        {order.customerName || order.customer?.name || "Registered Client"}
+                      </div>
                       <div className="text-[10px] text-slate-400 uppercase tracking-tighter">Registered Client</div>
                     </td>
-                    <td className="p-4 font-black text-slate-800">${parseFloat(order.totalAmount || order.finalTotal).toLocaleString()}</td>
+                    <td className="p-4 font-black text-slate-800">
+                      {(order.totalAmount || order.finalTotal || 0).toLocaleString()}
+                    </td>
                     <td className="p-4">
                       <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${
                         order.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -180,7 +193,12 @@ const Orders = () => {
                       </span>
                     </td>
                     <td className="p-4 text-center">
-                      <button className="bg-slate-100 text-slate-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Details</button>
+                      <button 
+                        onClick={() => openDetails(order)}
+                        className="bg-slate-100 text-slate-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all"
+                      >
+                        Details
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -190,7 +208,6 @@ const Orders = () => {
         </div>
       </div>
 
-      {/* --- MODAL --- */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col">
@@ -248,7 +265,7 @@ const Orders = () => {
                         onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
                       >
                         <option value="">Select Product</option>
-                        {products.map(p => <option key={p.id} value={p.id}>{p.name} (${p.price})</option>)}
+                        {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price})</option>)}
                       </select>
                     </div>
                     <div className="col-span-5 md:col-span-2">
@@ -263,7 +280,7 @@ const Orders = () => {
                       <label className="text-[10px] uppercase font-black text-slate-400 mb-1 block">Price</label>
                       <input 
                         type="text" readOnly className="w-full bg-white/50 border-2 border-transparent rounded-xl p-2.5 text-sm font-black text-slate-600"
-                        value={`$${item.unitPrice}`}
+                        value={`${item.unitPrice}`}
                       />
                     </div>
                     <div className="col-span-2 md:col-span-1">
@@ -275,22 +292,21 @@ const Orders = () => {
 
               <div className="bg-slate-50 rounded-2xl p-6 space-y-4 border border-slate-100">
                 <div className="flex justify-between items-end">
-                   <div className="w-1/3">
-                      <label className="block text-[10px] font-black text-slate-500 uppercase mb-1">Tax / Service ($)</label>
+                    <div className="w-1/3">
+                      <label className="block text-[10px] font-black text-slate-500 uppercase mb-1">Tax Percentage (%)</label>
                       <input 
                         type="number" className="w-full border-2 border-white rounded-xl p-2 text-sm outline-none font-bold"
-                        value={newOrder.taxAmount}
+                        value={newOrder.taxPercentage}
                         onChange={(e) => {
                           const val = e.target.value;
-                          setNewOrder({...newOrder, taxAmount: val});
                           calculateTotal(newOrder.items, val);
                         }}
                       />
-                   </div>
-                   <div className="text-right">
+                    </div>
+                    <div className="text-right">
                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total Payable</p>
-                      <p className="text-4xl font-black text-slate-800 tracking-tighter">${newOrder.totalAmount}</p>
-                   </div>
+                      <p className="text-4xl font-black text-slate-800 tracking-tighter">{newOrder.totalAmount}</p>
+                    </div>
                 </div>
 
                 <div className="flex gap-3 pt-2">
@@ -309,6 +325,66 @@ const Orders = () => {
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDetailsModal && selectedOrder && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div className="p-6 border-b flex justify-between items-center bg-blue-600 text-white">
+              <div>
+                <h3 className="text-xl font-black">Order Details</h3>
+                <p className="text-xs opacity-80 uppercase tracking-tighter font-bold">ID: #ORD-{selectedOrder.id}</p>
+              </div>
+              <button onClick={() => setShowDetailsModal(false)} className="text-4xl leading-none">&times;</button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between items-center text-sm border-b pb-4">
+                <span className="text-slate-500 font-black uppercase text-[10px]">Customer:</span>
+                <span className="font-black text-slate-800 text-lg">
+                  {selectedOrder.customerName || selectedOrder.customer?.name || "N/A"}
+                </span>
+              </div>
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Items Purchased:</p>
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
+                  {selectedOrder.orderItems?.length > 0 ? (
+                    selectedOrder.orderItems.map((item, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm py-1 border-b last:border-0 border-slate-200 pb-2 last:pb-0">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-800">
+                            {item.productName || item.product?.name || `Product ID: ${item.productId}`}
+                          </span>
+                          <span className="text-[10px] font-black text-slate-400 uppercase">
+                            Qty: {item.qtySold || item.quantity} x {(item.priceAtSale || item.unitPrice || 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <span className="font-black text-blue-600">
+                          {((item.qtySold || item.quantity) * (item.priceAtSale || item.unitPrice)).toLocaleString()}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-center text-slate-400 py-4 italic">No items detail found.</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t-2 border-dashed border-slate-100">
+                <span className="text-sm font-black text-slate-500 uppercase tracking-widest">Grand Total:</span>
+                <span className="text-3xl font-black text-slate-900 tracking-tighter">
+                  ${parseFloat(selectedOrder.finalTotal || selectedOrder.totalAmount || 0).toLocaleString()}
+                </span>
+              </div>
+            </div>
+            <div className="p-6 pt-0">
+              <button 
+                onClick={() => setShowDetailsModal(false)} 
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 transition-all"
+              >
+                Close Details
+              </button>
+            </div>
           </div>
         </div>
       )}

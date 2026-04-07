@@ -23,7 +23,9 @@ namespace ERP.API.Data
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Payroll> Payrolls { get; set; }
         public DbSet<Leave> Leaves { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
+        public DbSet<BankTransaction> BankTransactions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
