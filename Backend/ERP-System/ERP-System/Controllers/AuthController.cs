@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ERP.API.Data;
-using ERP.API.Models;
+﻿using ERP.API.Data;
 using ERP.API.DTOs;
+using ERP.API.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BC = BCrypt.Net.BCrypt;
+using BCrypt.Net;
 
 namespace ERP_System.Controllers
 {
@@ -37,7 +37,7 @@ namespace ERP_System.Controllers
             {
                 Name = registerDto.Name,
                 Email = registerDto.Email,
-                Password = BC.HashPassword(registerDto.Password), // Hash Password
+                Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password), // Hash Password
                 Role = registerDto.Role,
                 IsActive = true
             };
@@ -55,7 +55,7 @@ namespace ERP_System.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
             // Password verify kar rahe hain
-            if (user == null || !BC.Verify(loginDto.Password, user.Password))
+            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
             {
                 return Unauthorized("Invalid Email or Password!");
             }

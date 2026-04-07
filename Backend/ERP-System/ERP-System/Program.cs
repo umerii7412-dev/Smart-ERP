@@ -1,18 +1,22 @@
-using Microsoft.EntityFrameworkCore;
 using ERP.API.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using System.Text;
-
-using SwaggerModels = Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ==========================================
 // 1. DATABASE CONNECTION
+// ==========================================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// ==========================================
 // 2. JWT AUTHENTICATION SETUP
+// ==========================================
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "SmartERP_Secure_Key_32_Chars_Long_!!!";
 var keyBytes = Encoding.ASCII.GetBytes(jwtKey);
 
@@ -32,58 +36,73 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// ==========================================
+// 3. SERVICES
+// ==========================================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// 3. SWAGGER CONFIGURATION
+// SWAGGER — Sirf ek baar AddSwaggerGen
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new SwaggerModels.OpenApiInfo { Title = "ERP-System API", Version = "v1" });
-
-    // 1. JWT Security Definition add karein
-    c.AddSecurityDefinition("Bearer", new SwaggerModels.OpenApiSecurityScheme
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Name = "Authorization",
-        Type = SwaggerModels.SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = SwaggerModels.ParameterLocation.Header,
-        Description = "Sirf apna Token paste karein (Bearer likhne ki zaroorat nahi)."
+        Title = "Smart ERP API",
+        Version = "v1",
+        Description = "Smart ERP System REST API"
     });
 
-    // 2. Global Security Requirement add karein
-    c.AddSecurityRequirement(new SwaggerModels.OpenApiSecurityRequirement
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Enter: Bearer {your_token}",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new SwaggerModels.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new SwaggerModels.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = SwaggerModels.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
 var app = builder.Build();
 
+// ==========================================
 // 4. MIDDLEWARE PIPELINE
-if (app.Environment.IsDevelopment())
+// ==========================================
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ERP-System V1");
-        // FIX: Maine yahan se RoutePrefix hata diya hai taake /swagger kaam kare
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Smart ERP V1");
+    c.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
