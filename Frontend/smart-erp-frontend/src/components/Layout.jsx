@@ -28,10 +28,10 @@ const Layout = ({ children }) => {
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans">
+    <div className="flex h-screen bg-[#f5f7fa] font-sans">
       {/* Sidebar */}
-      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#1e293b] text-white transition-all duration-300 flex flex-col shadow-2xl z-20`}>
-        <div className="p-6 text-xl font-black border-b border-slate-700 truncate tracking-wider text-blue-400">
+      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#2c3e50] text-white transition-all duration-300 flex flex-col shadow-2xl z-20`}>
+        <div className="p-6 text-xl font-black border-b border-[#34495e] truncate tracking-wider text-blue-400">
           {isSidebarOpen ? 'SMART ERP' : 'ERP'}
         </div>
 
@@ -45,8 +45,8 @@ const Layout = ({ children }) => {
                 to={item.path}
                 className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group ${
                   location.pathname === item.path
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-[#3498db] text-white shadow-lg'
+                  : 'text-[#ecf0f1] hover:bg-[#34495e] hover:text-white'
                 }`}
               >
                 <span className="text-xl group-hover:scale-110 transition-transform">{item.icon}</span>
@@ -68,34 +68,34 @@ const Layout = ({ children }) => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-white shadow-md flex items-center justify-between px-8 border-b border-slate-200 z-10">
+        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-8 border-b border-[#ecf0f1] z-10">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors focus:outline-none shadow-sm"
+              className="p-2 rounded-lg bg-[#ecf0f1] text-[#2c3e50] hover:bg-[#3498db] hover:text-white transition-colors focus:outline-none shadow-sm"
             >
               {isSidebarOpen ? '❮' : '☰'}
             </button>
-            <h2 className="hidden md:block text-slate-400 font-medium">
-              System / <span className="text-slate-800 font-bold capitalize">{location.pathname.replace('/', '') || 'Dashboard'}</span>
+            <h2 className="hidden md:block text-[#95a5a6] font-medium">
+              System / <span className="text-[#2c3e50] font-bold capitalize">{location.pathname.replace('/', '') || 'Dashboard'}</span>
             </h2>
           </div>
 
-          <div className="flex items-center gap-4 group cursor-pointer p-1 pr-4 rounded-full hover:bg-slate-50 transition-all">
+          <div className="flex items-center gap-4 group cursor-pointer p-1 pr-4 rounded-full hover:bg-[#ecf0f1] transition-all">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-slate-800 leading-none">{userName}</p>
-              <span className="text-[10px] text-blue-600 font-black uppercase tracking-widest">
+              <p className="text-sm font-bold text-[#2c3e50] leading-none">{userName}</p>
+              <span className="text-[10px] text-[#3498db] font-black uppercase tracking-widest">
                 {userRole}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200 group-hover:rotate-6 transition-transform text-lg uppercase">
+            <div className="w-10 h-10 rounded-xl bg-[#3498db] flex items-center justify-center text-white font-bold shadow-md group-hover:shadow-lg transition-all text-lg uppercase">
               {userName.charAt(0)}
             </div>
           </div>
         </header>
 
         {/* Main View Port */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-8 bg-[#f8fafc]">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-8 bg-[#f5f7fa]">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {children}
           </div>

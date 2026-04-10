@@ -96,8 +96,8 @@ const Reporting = () => {
   if (loading) return (
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div>
-        <p className="font-bold text-slate-600 uppercase tracking-widest">Loading Reports...</p>
+        <div className="animate-spin w-12 h-12 border-4 border-[#3498db] border-t-transparent rounded-full mb-4"></div>
+        <p className="font-bold text-[#2c3e50] uppercase tracking-widest">Loading Reports...</p>
       </div>
     </Layout>
   );
@@ -106,24 +106,24 @@ const Reporting = () => {
     <Layout>
       <div className="space-y-6 pb-10">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl shadow-sm border border-[#ecf0f1] gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-slate-800 uppercase tracking-tight">
+            <h2 className="text-3xl font-bold text-[#2c3e50] uppercase tracking-tight">
   Enterprise Reporting
 </h2>
-            <p className="text-slate-500 font-medium tracking-tight">Real-time business insights & system analytics</p>
+            <p className="text-[#95a5a6] font-medium tracking-tight">Real-time business insights & system analytics</p>
           </div>
           <div className="flex gap-2">
             {/* ✅ Export CSV Button */}
             <button 
               onClick={handleDownloadCSV} 
-              className="bg-slate-800 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-black transition-all shadow-lg flex items-center gap-2"
+              className="bg-[#2c3e50] text-white px-6 py-2.5 rounded-xl font-bold hover:bg-[#1a252f] transition-all shadow-lg flex items-center gap-2"
             >
               <span>📥</span> Export CSV
             </button>
             <button 
               onClick={fetchAllReports} 
-              className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center gap-2"
+              className="bg-[#3498db] text-white px-6 py-2.5 rounded-xl font-bold hover:bg-[#2980b9] transition-all shadow-lg shadow-[#3498db]/20 flex items-center gap-2"
             >
               <span>🔄</span> Refresh Data
             </button>
@@ -131,7 +131,7 @@ const Reporting = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 border-b border-slate-200">
+        <div className="flex flex-wrap gap-2 border-b border-[#ecf0f1]">
           {['overview', 'banks', 'customers', 'inventory', 'orders'].map((tab) => (
             <button
               key={tab}

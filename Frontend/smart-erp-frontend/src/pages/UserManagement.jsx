@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-// ✅ Humne getAllBaseRoles ko bhi import kiya
 import { getAllUsers, toggleUserStatus, registerUser, getUserPermissions, assignUserPermissions, getAllBaseRoles } from '../api'; 
 import Layout from '../components/Layout'; 
 import toast from 'react-hot-toast';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]); // ✅ Nayi state roles store karne ke liye
+  const [roles, setRoles] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   
-  // --- NAYI STATES FOR PERMISSIONS ---
   const [isPermModalOpen, setIsPermModalOpen] = useState(false); 
   const [permissionsList, setPermissionsList] = useState([]); 
   const [targetUser, setTargetUser] = useState(null); 
@@ -27,7 +25,7 @@ const UserManagement = () => {
 
   useEffect(() => {
     loadUsers();
-    loadRoles(); // ✅ Roles load karne ka function yahan call kiya
+    loadRoles();
   }, []);
 
   const loadUsers = async () => {
@@ -41,7 +39,6 @@ const UserManagement = () => {
     }
   };
 
-  // ✅ Naya function roles ko backend se lane ke liye
   const loadRoles = async () => {
     try {
       const res = await getAllBaseRoles();
@@ -50,8 +47,6 @@ const UserManagement = () => {
       console.error("Roles fetch error");
     }
   };
-
-  // --- PERMISSIONS FUNCTIONS ---
 
   const handleOpenPermissions = async (user) => {
     setTargetUser(user);
@@ -116,41 +111,42 @@ const UserManagement = () => {
       <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-black text-slate-800">User Control Center</h1>
-            <p className="text-slate-500 text-sm font-medium">Manage system access and permissions</p>
+            <h1 className="text-2xl font-black text-[#2c3e50]">User Control Center</h1>
+            <p className="text-[#95a5a6] text-sm font-medium mt-1">Manage system access and permissions</p>
           </div>
           
           {isAdmin && (
             <button 
-              onClick={() => setShowModal(true)}
-              className="bg-blue-600 text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg hover:bg-blue-700 transition-all active:scale-95"
-            >
-              + Create New User
-            </button>
+  onClick={() => setShowModal(true)}
+  className="bg-[#3da9f5] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg hover:bg-[#2980b9] transition-all active:scale-95 capitalize tracking-wider"
+>
+  + Create New User
+</button>
           )}
         </div>
 
         <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/50">
-              <tr className="text-[11px] font-black uppercase text-slate-400 tracking-wider">
-                <th className="p-6">User Info</th>
-                <th className="p-6 text-center">Designation / Role</th>
-                <th className="p-6 text-center">Status</th>
-                <th className="p-6 text-right">Actions</th>
-              </tr>
-            </thead>
+            {/* Table Header - Sky Blue Background and Bold Black Text */}
+            <thead className="bg-[#3da9f5]">
+    <tr className="text-[11px] font-[950] uppercase text-black tracking-widest border-b border-black/5">
+        <th className="p-6 font-black">User Info</th>
+        <th className="p-6 text-center font-black">Designation / Role</th>
+        <th className="p-6 text-center font-black">Status</th>
+        <th className="p-6 text-right font-black">Actions</th>
+    </tr>
+</thead>
             <tbody className="divide-y divide-slate-50">
               {users.map((user) => (
-                <tr key={user.userId} className="hover:bg-slate-50/50 transition-all group">
+                <tr key={user.userId} className="hover:bg-[#f5f7fa] transition-all group border-b border-[#ecf0f1]">
                   <td className="p-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black">
+                      <div className="w-10 h-8 rounded-lg  bg-opacity-10 text-[#3da9f5] flex items-center justify-center font-bold">
                         {user.name?.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-bold text-slate-800">{user.name}</p>
-                        <p className="text-xs text-slate-400 font-medium">{user.email}</p>
+                        <p className="font-semibold text-[#2c3e50]">{user.name}</p>
+                        <p className="text-xs text-[#95a5a6] font-medium">{user.email}</p>
                       </div>
                     </div>
                   </td>
@@ -169,16 +165,17 @@ const UserManagement = () => {
                   <td className="p-6 text-right space-x-2">
                     {(user.roleName !== 'Admin' && user.role?.name !== 'Admin') ? (
                       <>
+                        {/* Grant Permission Button - Same Sky Blue */}
                         <button 
                           onClick={() => handleOpenPermissions(user)}
-                          className="px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white transition-all"
+                          className="px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-[#3da9f5] text-white hover:bg-[#2980b9] transition-all shadow-sm"
                         >
                           Grant Permission
                         </button>
                         <button 
                           onClick={() => handleStatusChange(user.userId)}
                           className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${
-                            user.isActive ? 'bg-slate-800 text-white hover:bg-red-600' : 'bg-blue-600 text-white'
+                            user.isActive ? 'bg-slate-800 text-white hover:bg-red-600' : 'bg-[#3da9f5] text-white'
                           }`}
                         >
                           {user.isActive ? 'Block Access' : 'Unblock Access'}
@@ -196,19 +193,17 @@ const UserManagement = () => {
           </table>
         </div>
 
-        {/* --- 🛡️ GRANT PERMISSION MODAL --- */}
+        {/* --- GRANT PERMISSION MODAL --- */}
         {isPermModalOpen && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-            <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
-              
-              <div className="bg-blue-600 p-6 text-white flex justify-between items-center">
+            <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden">
+              <div className="bg-[#3da9f5] p-6 text-white flex justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-black italic uppercase">Grant Permissions</h2>
+                    <h2 className="text-xl font-black uppercase">Grant Permissions</h2>
                     <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest">User: {targetUser?.name}</p>
                 </div>
                 <button onClick={() => setIsPermModalOpen(false)} className="text-2xl hover:scale-110 transition-transform">×</button>
               </div>
-              
               <div className="p-8 max-h-[400px] overflow-y-auto space-y-6">
                  {Array.from(new Set(permissionsList.map(p => p.module))).map(moduleName => (
                     <div key={moduleName} className="space-y-3">
@@ -219,7 +214,7 @@ const UserManagement = () => {
                                     <span className="text-sm font-bold text-slate-700">{perm.name.replace(/_/g, ' ')}</span>
                                     <input 
                                         type="checkbox" 
-                                        className="w-5 h-5 rounded-lg border-slate-300 text-blue-600 focus:ring-blue-500"
+                                        className="w-5 h-5 rounded-lg border-slate-300 text-[#3da9f5] focus:ring-[#3da9f5]"
                                         checked={perm.isAssigned}
                                         onChange={() => togglePermission(perm.id)}
                                     />
@@ -229,17 +224,16 @@ const UserManagement = () => {
                     </div>
                  ))}
               </div>
-
               <div className="p-6 bg-slate-50 border-t flex gap-3">
                 <button 
                   onClick={() => setIsPermModalOpen(false)}
-                  className="flex-1 py-4 text-xs font-black uppercase text-slate-400 hover:text-slate-600 transition-all"
+                  className="flex-1 py-4 text-xs font-black uppercase text-slate-400 hover:text-slate-600"
                 >
                   Discard
                 </button>
                 <button 
                   onClick={handleSavePermissions}
-                  className="flex-[2] bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 transition-all shadow-blue-200"
+                  className="flex-[2] bg-[#3da9f5] text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-[#2980b9] transition-all"
                 >
                   Save Access Rights
                 </button>
@@ -252,54 +246,32 @@ const UserManagement = () => {
         {showModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden">
-              <div className="bg-blue-600 p-6 text-white flex justify-between items-center">
-                <h2 className="text-xl font-black italic uppercase tracking-tight">Register New User</h2>
+              <div className="bg-[#3da9f5] p-6 text-white flex justify-between items-center">
+                <h2 className="text-xl font-black uppercase tracking-tight">Register New User</h2>
                 <button onClick={() => setShowModal(false)} className="text-2xl hover:rotate-90 transition-transform">×</button>
               </div>
               <form onSubmit={handleAddUser} className="p-8 space-y-5">
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Full Name</label>
-                  <input 
-                    required className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="Enter name"
-                    value={newUser.name}
-                    onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                  />
+                  <input required className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#3da9f5] outline-none" value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Email</label>
-                  <input 
-                    required type="email" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="email@example.com"
-                    value={newUser.email}
-                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                  />
+                  <input required type="email" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#3da9f5] outline-none" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Password</label>
-                  <input 
-                    required type="password" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="••••••••"
-                    value={newUser.password}
-                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                  />
+                  <input required type="password" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#3da9f5] outline-none" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Role</label>
-                  <select 
-                    className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold outline-none cursor-pointer"
-                    value={newUser.roleId}
-                    onChange={(e) => setNewUser({...newUser, roleId: parseInt(e.target.value)})}
-                  >
-                    {/* ✅ Yahan roles state ko map kiya hai taake naya role nazar aaye */}
+                  <select className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold outline-none cursor-pointer" value={newUser.roleId} onChange={(e) => setNewUser({...newUser, roleId: parseInt(e.target.value)})}>
                     {roles.map((role) => (
-                      <option key={role.id} value={role.id}>
-                        {role.name}
-                      </option>
+                      <option key={role.id} value={role.id}>{role.name}</option>
                     ))}
                   </select>
                 </div>
-                <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 transition-all">
+                <button type="submit" className="w-full bg-[#3da9f5] text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-[#2980b9] transition-all">
                   Add User
                 </button>
               </form>

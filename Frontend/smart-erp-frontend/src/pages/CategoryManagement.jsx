@@ -3,7 +3,7 @@ import Layout from '../components/Layout';
 import api from '../api';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Tag, Trash2 } from 'lucide-react'; // Trash2 icon add kiya
+import { Plus, Tag, Trash2 } from 'lucide-react';
 
 const CategoryManagement = () => {
   const navigate = useNavigate();
@@ -23,9 +23,8 @@ const CategoryManagement = () => {
     }
   };
 
-  // --- DELETE FUNCTION ---
   const handleDelete = async (e, id) => {
-    e.stopPropagation(); // Card click (navigate) ko rokne ke liye
+    e.stopPropagation(); 
     if (!window.confirm("Are you sure you want to delete?")) return;
 
     try {
@@ -41,13 +40,12 @@ const CategoryManagement = () => {
     e.preventDefault();
     if (!newCategory) return;
 
-    // --- CASE INSENSITIVE CHECK ---
     const categoryExists = categories.find(
       (cat) => cat.name.trim().toLowerCase() === newCategory.trim().toLowerCase()
     );
 
     if (categoryExists) {
-      toast.error("Category Already Exist (Small/Capital dono check kar liye)!");
+      toast.error("Category Already Exist!");
       return;
     }
 
@@ -69,15 +67,17 @@ const CategoryManagement = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-slate-800 tracking-tight uppercase">
-  Categories
-</h1>
-<p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-  Inventory Classification
-</p>
+              Categories
+            </h1>
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+              Inventory Classification
+            </p>
           </div>
+          
+          {/* UPDATED: Add Category Button Color & Text Case */}
           <button 
             onClick={() => setShowModal(true)}
-            className="bg-blue-600 text-white px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2"
+            className="bg-[#3da9f5] text-white px-8 py-3 rounded-2xl text-xs font-black !normal-case tracking-widest shadow-xl shadow-blue-100 hover:bg-[#2980b9] transition-all flex items-center gap-2"
           >
             <Plus size={16} /> Add Category
           </button>
@@ -88,9 +88,8 @@ const CategoryManagement = () => {
             <div 
               key={cat.id} 
               onClick={() => navigate('/inventory', { state: { categoryName: cat.name } })}
-              className="bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-500 cursor-pointer transition-all group relative overflow-hidden"
+              className="bg-white p-6 rounded-[28px] border border-[#ecf0f1] shadow-sm hover:shadow-md hover:border-[#3da9f5] cursor-pointer transition-all group relative overflow-hidden"
             >
-              {/* DELETE BUTTON (TOP RIGHT) */}
               <button 
                 onClick={(e) => handleDelete(e, cat.id)}
                 className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 transition-colors z-10"
@@ -98,7 +97,8 @@ const CategoryManagement = () => {
                 <Trash2 size={16} />
               </button>
 
-              <div className="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              {/* UPDATED: Icon Color to Sky Blue */}
+              <div className="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 text-[#3da9f5] group-hover:bg-[#3da9f5] group-hover:text-white transition-colors">
                 <Tag size={20} />
               </div>
               <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">{cat.name}</h3>
@@ -121,7 +121,7 @@ const CategoryManagement = () => {
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Category Name</label>
                   <input 
                     required 
-                    className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-2 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-2 text-sm font-bold focus:ring-2 focus:ring-[#3da9f5] outline-none"
                     placeholder="e.g. Electronics"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
@@ -129,8 +129,9 @@ const CategoryManagement = () => {
                 </div>
                 <div className="flex gap-3">
                   <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-xs font-black uppercase text-slate-400">Cancel</button>
-                  <button type="submit" disabled={loading} className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg shadow-blue-100">
-                    {loading ? "Saving..." : "Save"}
+                  {/* UPDATED: Modal Button Color */}
+                  <button type="submit" disabled={loading} className="flex-1 bg-[#3da9f5] text-white py-4 rounded-2xl font-black !normal-case text-xs shadow-lg shadow-blue-100 hover:bg-[#2980b9]">
+                    {loading ? "Saving..." : "Save Category"}
                   </button>
                 </div>
               </form>

@@ -56,51 +56,51 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="p-8 bg-[#F8FAFC] min-h-screen space-y-8">
+      <div className="p-8 bg-[#f5f7fa] min-h-screen space-y-8">
         
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
-  <LayoutDashboard className="text-blue-600" /> ERP Analytics Dashboard
+          <h1 className="text-2xl font-black text-[#2c3e50] tracking-tight uppercase flex items-center gap-2">
+  <LayoutDashboard className="text-[#3498db]" /> ERP Analytics Dashboard
 </h1>
-          <button onClick={fetchDashboardData} className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl text-xs font-black hover:bg-slate-50 transition-all shadow-sm">
+          <button onClick={fetchDashboardData} className="flex items-center gap-2 bg-white border border-[#ecf0f1] px-4 py-2 rounded-xl text-xs font-black hover:bg-[#f5f7fa] transition-all shadow-sm">
             <RefreshCcw size={14} className={loading ? "animate-spin" : ""} /> {loading ? "Syncing..." : "Refresh"}
           </button>
         </div>
 
         {/* --- THREE STATS CARDS --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div onClick={() => navigate('/inventory')} className="cursor-pointer p-6 bg-white rounded-[24px] border border-slate-100 shadow-sm hover:border-blue-600 transition-all group">
+          <div onClick={() => navigate('/inventory')} className="cursor-pointer p-6 bg-white rounded-[24px] border border-[#ecf0f1] shadow-sm hover:border-[#3498db] transition-all group">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-black uppercase text-slate-400">Total Products</p>
-                <h2 className="text-3xl font-black text-slate-900 mt-1">{stats.totalProducts}</h2>
+                <p className="text-[10px] font-black uppercase text-[#95a5a6]">Total Products</p>
+                <h2 className="text-3xl font-black text-[#2c3e50] mt-1">{stats.totalProducts}</h2>
               </div>
-              <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <div className="p-3 rounded-2xl bg-[#3498db] bg-opacity-10 text-[#3498db] group-hover:bg-[#3498db] group-hover:text-white transition-colors">
                 <Package size={24} />
               </div>
             </div>
           </div>
 
-          <div onClick={() => navigate('/inventory', { state: { filter: 'low' } })} className="cursor-pointer p-6 bg-white rounded-[24px] border border-slate-100 shadow-sm hover:border-rose-600 transition-all group">
+          <div onClick={() => navigate('/inventory', { state: { filter: 'low' } })} className="cursor-pointer p-6 bg-white rounded-[24px] border border-[#ecf0f1] shadow-sm hover:border-[#e74c3c] transition-all group">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-black uppercase text-slate-400">Low Stock Items</p>
-                <h2 className={`text-3xl font-black mt-1 ${stats.lowStock > 0 ? 'text-rose-600' : 'text-slate-900'}`}>{stats.lowStock}</h2>
+                <p className="text-[10px] font-black uppercase text-[#95a5a6]">Low Stock Items</p>
+                <h2 className={`text-3xl font-black mt-1 ${stats.lowStock > 0 ? 'text-[#e74c3c]' : 'text-[#2c3e50]'}`}>{stats.lowStock}</h2>
               </div>
-              <div className="p-3 rounded-2xl bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+              <div className="p-3 rounded-2xl bg-[#e74c3c] bg-opacity-10 text-[#e74c3c] group-hover:bg-[#e74c3c] group-hover:text-white transition-colors">
                 <AlertTriangle size={24} />
               </div>
             </div>
           </div>
 
-          <div onClick={() => navigate('/categories')} className="cursor-pointer p-6 bg-white rounded-[24px] border border-slate-100 shadow-sm hover:border-emerald-600 transition-all group">
+          <div onClick={() => navigate('/categories')} className="cursor-pointer p-6 bg-white rounded-[24px] border border-[#ecf0f1] shadow-sm hover:border-[#27ae60] transition-all group">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-black uppercase text-slate-400">Total Categories</p>
+                <p className="text-[10px] font-black uppercase text-[#95a5a6]">Total Categories</p>
                 <h2 className="text-3xl font-black text-slate-900 mt-1">{stats.totalCategories}</h2>
               </div>
-              <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <div className="p-3 rounded-2xl bg-[#27ae60] bg-opacity-10 text-[#27ae60] group-hover:bg-[#27ae60] group-hover:text-white transition-colors">
                 <Tags size={24} />
               </div>
             </div>
@@ -109,8 +109,8 @@ const Dashboard = () => {
 
         {/* --- GRAPHS SECTION --- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-         <div className="lg:col-span-8 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm min-h-[450px] flex flex-col">
-  <h3 className="text-sm font-black uppercase text-slate-800 mb-6 text-center tracking-widest">
+          <div className="lg:col-span-8 bg-white rounded-[32px] p-8 border border-[#ecf0f1] shadow-sm min-h-[450px] flex flex-col">
+  <h3 className="text-sm font-black uppercase text-[#2c3e50] mb-6 text-center tracking-widest">
     Stock Level Analysis
   </h3>
   
@@ -136,8 +136,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-         <div className="lg:col-span-4 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm min-h-[450px] flex flex-col">
-  <h3 className="text-sm font-black uppercase text-slate-800 mb-6 text-center tracking-widest">
+          <div className="lg:col-span-4 bg-white rounded-[32px] p-8 border border-[#ecf0f1] shadow-sm min-h-[450px] flex flex-col">
+  <h3 className="text-sm font-black uppercase text-[#2c3e50] mb-6 text-center tracking-widest">
     Category Distribution
   </h3>
   
