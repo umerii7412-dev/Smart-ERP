@@ -108,7 +108,9 @@ const Reporting = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100 gap-4">
           <div>
-            <h2 className="text-3xl font-black text-slate-800 italic uppercase">Enterprise Reporting</h2>
+            <h2 className="text-3xl font-bold text-slate-800 uppercase tracking-tight">
+  Enterprise Reporting
+</h2>
             <p className="text-slate-500 font-medium tracking-tight">Real-time business insights & system analytics</p>
           </div>
           <div className="flex gap-2">
@@ -359,7 +361,7 @@ const NoDataFound = () => (
   <tr>
     <td colSpan="100%" className="p-20 text-center">
       <div className="text-slate-300 text-5xl mb-4">📂</div>
-      <p className="text-slate-400 font-black uppercase text-xs tracking-widest">Abhi tak koi data available nahi hai</p>
+      <p className="text-slate-400 font-black uppercase text-xs tracking-widest">Invalid Data</p>
     </td>
   </tr>
 );

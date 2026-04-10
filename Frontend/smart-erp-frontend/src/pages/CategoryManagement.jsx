@@ -68,8 +68,12 @@ const CategoryManagement = () => {
       <div className="p-8 bg-[#F8FAFC] min-h-screen space-y-8 animate-in fade-in duration-500">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Categories</h1>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Inventory Classification</p>
+            <h1 className="text-3xl font-bold text-slate-800 tracking-tight uppercase">
+  Categories
+</h1>
+<p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+  Inventory Classification
+</p>
           </div>
           <button 
             onClick={() => setShowModal(true)}

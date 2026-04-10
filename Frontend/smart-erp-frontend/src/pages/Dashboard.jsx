@@ -60,9 +60,9 @@ const Dashboard = () => {
         
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic flex items-center gap-2">
-            <LayoutDashboard className="text-blue-600" /> ERP Analytics Dashboard
-          </h1>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
+  <LayoutDashboard className="text-blue-600" /> ERP Analytics Dashboard
+</h1>
           <button onClick={fetchDashboardData} className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl text-xs font-black hover:bg-slate-50 transition-all shadow-sm">
             <RefreshCcw size={14} className={loading ? "animate-spin" : ""} /> {loading ? "Syncing..." : "Refresh"}
           </button>
@@ -109,10 +109,13 @@ const Dashboard = () => {
 
         {/* --- GRAPHS SECTION --- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm min-h-[450px] flex flex-col">
-            <h3 className="text-sm font-black uppercase text-slate-800 italic mb-6 text-center">Stock Level Analysis</h3>
-            {/* Added a relative wrapper with explicit height to fix the -1 width/height warning */}
-            <div className="relative w-full h-[320px] min-h-0">
+         <div className="lg:col-span-8 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm min-h-[450px] flex flex-col">
+  <h3 className="text-sm font-black uppercase text-slate-800 mb-6 text-center tracking-widest">
+    Stock Level Analysis
+  </h3>
+  
+  {/* Added a relative wrapper with explicit height to fix the -1 width/height warning */}
+  <div className="relative w-full h-[320px] min-h-0">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -133,11 +136,14 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-4 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm min-h-[450px] flex flex-col">
-            <h3 className="text-sm font-black uppercase text-slate-800 italic mb-6 text-center">Category Distribution</h3>
-            {/* Added a relative wrapper with explicit height */}
-            <div className="relative w-full h-[320px] min-h-0">
-              <ResponsiveContainer width="100%" height="100%">
+         <div className="lg:col-span-4 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm min-h-[450px] flex flex-col">
+  <h3 className="text-sm font-black uppercase text-slate-800 mb-6 text-center tracking-widest">
+    Category Distribution
+  </h3>
+  
+  {/* Added a relative wrapper with explicit height */}
+  <div className="relative w-full h-[320px] min-h-0">
+    <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie 
                     data={categoryData} 
