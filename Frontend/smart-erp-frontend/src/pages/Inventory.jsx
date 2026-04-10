@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api';
 import Layout from '../components/Layout';
 import toast from 'react-hot-toast';
-import { Trash2, Pencil } from 'lucide-react'; // Icons import kiye
+import { Trash2, Pencil } from 'lucide-react';
 
 const Inventory = () => {
   const location = useLocation();
@@ -41,14 +41,12 @@ const Inventory = () => {
     }
   };
 
-  // --- DELETE FUNCTION ---
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete?")) return;
-
     try {
       await api.delete(`/Inventory/${id}`);
       toast.success("Product Deleted!");
-      fetchInventory(); // List update karne ke liye
+      fetchInventory();
     } catch (error) {
       toast.error("Delete Error!");
     }
@@ -92,17 +90,20 @@ const Inventory = () => {
     setNewProduct({ name: '', categoryId: '', price: '', stockQuantity: '' });
   };
 
-  // --- FILTER LOGIC ---
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (p.category && p.category.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    // ✅ Safe Search Logic: Object check add kiya gaya hai
+    const productName = typeof p.name === 'object' ? p.name.name : p.name;
+    const categoryName = p.category?.name || "Uncategorized";
+
+    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         categoryName.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (location.state?.filter === 'low') {
         return matchesSearch && p.stockQuantity <= 10;
     }
     
     if (location.state?.categoryName) {
-        return matchesSearch && p.category?.name === location.state.categoryName;
+        return matchesSearch && categoryName === location.state.categoryName;
     }
 
     return matchesSearch;
@@ -156,9 +157,14 @@ const Inventory = () => {
                 ) : (
                   filteredProducts.map((item) => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4 font-semibold text-slate-700">{item.name}</td>
-                      <td className="p-4 text-slate-600 italic">{item.category?.name || "Uncategorized"}</td>
-                      <td className="p-4 text-blue-700 font-bold">{item.price}</td>
+                      {/* ✅ FIX: Name agar object ho to handle karega */}
+                      <td className="p-4 font-semibold text-slate-700">
+                        {typeof item.name === 'object' ? item.name.name : item.name}
+                      </td>
+                      <td className="p-4 text-slate-600 italic">
+                        {item.category?.name || "Uncategorized"}
+                      </td>
+                      <td className="p-4 text-blue-700 font-bold">Rs. {item.price}</td>
                       <td className="p-4 font-black">{item.stockQuantity}</td>
                       <td className="p-4 text-center">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${item.stockQuantity > 10 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -167,14 +173,12 @@ const Inventory = () => {
                       </td>
                       <td className="p-4 text-center">
                          <div className="flex justify-center gap-2">
-                          {/* Edit Button */}
                           <button 
                             onClick={() => { setEditingProduct(item); setNewProduct({ name: item.name, categoryId: item.categoryId, price: item.price, stockQuantity: item.stockQuantity }); setShowModal(true); }} 
                             className="p-2 bg-blue-50 text-blue-600 rounded-lg transition shadow-sm hover:bg-blue-100"
                           >
                             <Pencil size={16} />
                           </button>
-                          {/* Delete Button Add Kar Diya Gaya Hai */}
                           <button 
                             onClick={() => handleDelete(item.id)} 
                             className="p-2 bg-red-50 text-red-600 rounded-lg transition shadow-sm hover:bg-red-100"

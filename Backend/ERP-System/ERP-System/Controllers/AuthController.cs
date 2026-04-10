@@ -1,8 +1,8 @@
 ﻿using ERP.API.Data;
 using ERP.API.DTOs;
 using ERP.API.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -24,7 +24,26 @@ namespace ERP_System.Controllers
             _configuration = configuration;
         }
 
-        // 1. REGISTER API
+        // ✅ Naya Method: Users fetch karne ke liye (Error 404 fix karne ke liye)
+        [HttpGet("users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            // Sare users fetch karein jo Active hain
+            var users = await _context.Users
+                .Include(u => u.Role)
+                .OrderByDescending(u => u.UserId) // Naye users top par aayenge
+                .Select(u => new {
+                    u.UserId,
+                    u.Name,
+                    u.RoleId,
+                    RoleName = u.Role != null ? u.Role.Name : "User",
+                    u.IsActive
+                })
+                .ToListAsync();
+
+            return Ok(users);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
@@ -33,13 +52,26 @@ namespace ERP_System.Controllers
                 return BadRequest("Email already exists!");
             }
 
+            if (registerDto.RoleId == 1 || registerDto.RoleId == 2 || registerDto.RoleId == 3)
+            {
+                var roleExists = await _context.Users.AnyAsync(u => u.RoleId == registerDto.RoleId);
+                if (roleExists)
+                {
+                    string roleName = registerDto.RoleId == 1 ? "Admin" :
+                                    (registerDto.RoleId == 2 ? "Manager" : "HR");
+                    return BadRequest($"{roleName} already exists! System mein sirf aik hi {roleName} allow hai.");
+                }
+            }
+
             var user = new User
             {
                 Name = registerDto.Name,
                 Email = registerDto.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
-                Role = registerDto.Role,
-                IsActive = true // Naya user default active hoga
+                RoleId = registerDto.RoleId,
+                Phone = registerDto.Phone,     // Mapping Phone
+                Address = registerDto.Address, // Mapping Addres /
+                IsActive = true
             };
 
             _context.Users.Add(user);
@@ -48,23 +80,54 @@ namespace ERP_System.Controllers
             return Ok("User registered successfully!");
         }
 
-        // 2. LOGIN API
+        // ✅ Naya Method: User update karne ke liye
+        [HttpPut("users/{id}")]
+        public async Task<IActionResult> UpdateUser(int id, RegisterDto updateDto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound("User nahi mila.");
+
+            user.Name = updateDto.Name;
+            user.Email = updateDto.Email;
+            user.Phone = updateDto.Phone;
+            user.Address = updateDto.Address;
+
+            if (!string.IsNullOrEmpty(updateDto.Password))
+            {
+                user.Password = BCrypt.Net.BCrypt.HashPassword(updateDto.Password);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("User updated successfully!");
+        }
+
+        // ✅ Naya Method: User delete karne ke liye
+        [HttpDelete("users/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound("User nahi mila.");
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return Ok("User deleted successfully!");
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
-            // UPDATED: Password verify karne se pehle check karein user exist karta hai
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
             {
                 return Unauthorized("Invalid Email or Password!");
             }
 
-            // ADDED: Block Check Logic
-            // Agar Admin ne IsActive = false kiya hai, to login nahi hoga
             if (!user.IsActive)
             {
-                return BadRequest("Aapka account block kar diya gaya hai. Meharbani farmakar Admin se rabta karein.");
+                return BadRequest("Aapka account block kar diya gaya hai.");
             }
 
             var token = CreateToken(user);
@@ -73,28 +136,24 @@ namespace ERP_System.Controllers
             {
                 Token = token,
                 UserName = user.Name,
-                Role = user.Role,
-                UserId = user.UserId // Frontend management ke liye zaroori hai
+                Role = user.Role?.Name ?? "User",
+                UserId = user.UserId
             });
         }
 
-        // 3. JWT TOKEN GENERATION LOGIC
         private string CreateToken(User user)
         {
-            // UPDATED: Roles aur Claims ko strictly map kiya
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role), // Yeh Admin/Employee access control ke liye hai
+                new Claim(ClaimTypes.Role, user.Role?.Name ?? "User"),
                 new Claim("UserId", user.UserId.ToString()),
-                new Claim("IsActive", user.IsActive.ToString()) // Frontend par status check ke liye
+                new Claim("IsActive", user.IsActive.ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration["Jwt:Key"] ?? "SmartERP_Secure_Key_32_Chars_Long_!!!"
-            ));
-
+            var jwtKey = _configuration["Jwt:Key"] ?? "SmartERP_Secure_Key_32_Chars_Long_!!!";
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

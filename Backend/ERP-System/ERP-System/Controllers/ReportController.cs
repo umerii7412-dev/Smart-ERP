@@ -6,7 +6,7 @@ using ERP.API.DTOs;
 
 namespace ERP.API.Controllers
 {
-    [Authorize] // Filhal sirf Authorize rakha hai (Roles="Admin" baad mein add karein jab data show ho jaye)
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ReportController : ControllerBase
@@ -18,6 +18,7 @@ namespace ERP.API.Controllers
             _context = context;
         }
 
+        // 1. Inventory Summary (Existing)
         [HttpGet("inventory-summary")]
         public async Task<IActionResult> GetInventoryReport()
         {
@@ -37,6 +38,7 @@ namespace ERP.API.Controllers
             }
         }
 
+        // 2. Bank/Payment Report (Existing - Updated for Bank Name)
         [HttpGet("payment-by-methods")]
         public async Task<IActionResult> GetPaymentMethodReport()
         {
@@ -61,6 +63,7 @@ namespace ERP.API.Controllers
             }
         }
 
+        // 3. Employee Performance (Existing)
         [HttpGet("employee-performance")]
         public async Task<IActionResult> GetEmployeeReport()
         {
@@ -74,12 +77,58 @@ namespace ERP.API.Controllers
                     {
                         EmployeeName = g.Key,
                         OrdersProcessed = g.Count(),
-                        TotalSalesGenerated = g.Sum(o => o.FinalTotal)
+                        TotalSalesGenerated = g.Sum(o => o.TotalAmount)
                     })
                     .OrderByDescending(x => x.TotalSalesGenerated)
                     .ToListAsync();
 
                 return Ok(report);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // ✅ NEW: Customer Report (Aapki requirement ke mutabiq)
+        [HttpGet("customer-report")]
+        public async Task<IActionResult> GetCustomerReport()
+        {
+            try
+            {
+                var customers = await _context.Customers
+                    .Select(c => new {
+                        c.Name,
+                        c.Email,
+                        c.Phone,
+                        Balance = c.Balance // Customer ka balance
+                    })
+                    .ToListAsync();
+                return Ok(customers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // ✅ NEW: Product Detailed Report (Sale/Stock tracking ke liye)
+        [HttpGet("product-details")]
+        public async Task<IActionResult> GetProductDetails()
+        {
+            try
+            {
+                var products = await _context.Products
+                    .Select(p => new {
+                        p.Name,
+                        p.Category,
+                        p.StockQuantity, // Kitni reh gayi
+                        p.Price,
+                        // Sale logic: Total orders se count kar sakte hain ya simple stock dikha dein
+                        Status = p.StockQuantity <= 0 ? "Out of Stock" : "Available"
+                    })
+                    .ToListAsync();
+                return Ok(products);
             }
             catch (Exception ex)
             {

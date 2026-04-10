@@ -1,23 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using ERP.API.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace ERP.API.Models
+public class UserPermission
 {
-    public class UserPermission
-    {
-        [Key]
-        public int Id { get; set; }
+    [Key]
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public virtual User User { get; set; } = null!; // Fix
 
-        [Required]
-        public int UserId { get; set; }
+    public int PermissionId { get; set; }
+    public virtual Permission Permission { get; set; } = null!; // Fix
 
-        [ForeignKey("UserId")]
-        public virtual User User { get; set; }
-
-        [Required]
-        public int PermissionId { get; set; }
-
-        [ForeignKey("PermissionId")]
-        public virtual Permission Permission { get; set; }
-    }
+    public bool CanView { get; set; } = true;
+    public bool CanCreate { get; set; }
+    public bool CanUpdate { get; set; }
+    public bool CanDelete { get; set; }
 }

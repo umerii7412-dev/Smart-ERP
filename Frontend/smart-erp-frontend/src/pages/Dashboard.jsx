@@ -25,7 +25,6 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // NOTE: Make sure your backend has this route, or change to '/Inventory'
       const response = await api.get('/Inventory'); 
       const data = response.data;
       
@@ -69,7 +68,7 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* --- THREE STATS CARDS IN ONE LINE --- */}
+        {/* --- THREE STATS CARDS --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div onClick={() => navigate('/inventory')} className="cursor-pointer p-6 bg-white rounded-[24px] border border-slate-100 shadow-sm hover:border-blue-600 transition-all group">
             <div className="flex justify-between items-center">
@@ -110,11 +109,12 @@ const Dashboard = () => {
 
         {/* --- GRAPHS SECTION --- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm h-[450px] flex flex-col">
+          <div className="lg:col-span-8 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm min-h-[450px] flex flex-col">
             <h3 className="text-sm font-black uppercase text-slate-800 italic mb-6 text-center">Stock Level Analysis</h3>
-            <div className="flex-1 min-h-0 w-full">
+            {/* Added a relative wrapper with explicit height to fix the -1 width/height warning */}
+            <div className="relative w-full h-[320px] min-h-0">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorStock" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
@@ -124,24 +124,37 @@ const Dashboard = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" fontSize={10} fontWeight="bold" axisLine={false} tickLine={false} />
                   <YAxis fontSize={10} fontWeight="bold" axisLine={false} tickLine={false} />
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  />
                   <Area type="monotone" dataKey="quantity" stroke="#2563eb" fill="url(#colorStock)" strokeWidth={3} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div className="lg:col-span-4 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm h-[450px] flex flex-col">
+          <div className="lg:col-span-4 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm min-h-[450px] flex flex-col">
             <h3 className="text-sm font-black uppercase text-slate-800 italic mb-6 text-center">Category Distribution</h3>
-            <div className="flex-1 min-h-0 w-full">
+            {/* Added a relative wrapper with explicit height */}
+            <div className="relative w-full h-[320px] min-h-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={categoryData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                  <Pie 
+                    data={categoryData} 
+                    innerRadius={60} 
+                    outerRadius={80} 
+                    paddingAngle={5} 
+                    dataKey="value"
+                    animationBegin={0}
+                    animationDuration={800}
+                  >
                     {categoryData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>

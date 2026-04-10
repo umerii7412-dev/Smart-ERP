@@ -7,8 +7,8 @@ using ERP.API.DTOs;
 
 namespace ERP_System.Controllers
 {
-    [Authorize] // Sirf login users hi customers dekh saken
-    [Route("api/[controller]")]
+    [Authorize]
+    [Route("api/Customers")]
     [ApiController]
     public class CustomerController : ControllerBase
     {
@@ -19,60 +19,92 @@ namespace ERP_System.Controllers
             _context = context;
         }
 
-        // 1. GET ALL CUSTOMERS
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
         {
-            return await _context.Customers.ToListAsync();
+            try
+            {
+                // ✅ Change: Ab Users ki jagah direct Customers table se data le rahe hain
+                return await _context.Customers.OrderByDescending(c => c.Id).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Data fetch karne mein masla hai: " + ex.Message });
+            }
         }
 
-        // 2. GET CUSTOMER BY ID (Search)
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
+            // ✅ Change: Customers table mein ID check ho rahi hai
             var customer = await _context.Customers.FindAsync(id);
-            if (customer == null) return NotFound("Customer nahi mila.");
-            return customer;
+            if (customer == null) return NotFound(new { message = "Customer nahi mila." });
+            return Ok(customer);
         }
 
-        // 3. ADD NEW CUSTOMER
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(CustomerDto dto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // ✅ Change: Naya record 'Customer' model ka ban raha hai aur Customers table mein save ho raha hai
             var customer = new Customer
             {
                 Name = dto.Name,
                 Phone = dto.Phone,
+                Email = dto.Email,
+                Address = dto.Address,
                 Balance = dto.Balance
             };
 
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Customer registered successfully!", customer });
+            return Ok(new { message = "Customer added successfully!", customer });
         }
 
-        // 4. UPDATE CUSTOMER BALANCE (Specific Action)
-        // Ye tab kaam ayega jab hum order ya payment process karenge
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCustomer(int id, CustomerDto dto)
+        {
+            // ✅ Change: Customers table se record find ho raha hai
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer == null) return NotFound(new { message = "Customer record not found." });
+
+            customer.Name = dto.Name;
+            customer.Phone = dto.Phone;
+            customer.Email = dto.Email;
+            customer.Address = dto.Address;
+            customer.Balance = dto.Balance;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Customer updated successfully!", customer });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest(new { message = "Update fail ho gaya." });
+            }
+        }
+
         [HttpPut("update-balance/{id}")]
         public async Task<IActionResult> UpdateBalance(int id, [FromBody] decimal amount)
         {
             var customer = await _context.Customers.FindAsync(id);
-            if (customer == null) return NotFound();
+            if (customer == null) return NotFound(new { message = "Customer nahi mila." });
 
-            customer.Balance += amount; // Amount positive bhi ho sakti hai (Payment) aur negative bhi (Order)
+            customer.Balance += amount;
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Balance updated!", currentBalance = customer.Balance });
         }
 
-        // 5. DELETE CUSTOMER (Admin Only)
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
             var customer = await _context.Customers.FindAsync(id);
-            if (customer == null) return NotFound();
+            if (customer == null) return NotFound(new { message = "Record pehle hi delete ho chuka hai." });
 
             _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();

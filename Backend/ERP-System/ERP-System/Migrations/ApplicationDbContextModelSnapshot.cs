@@ -60,10 +60,9 @@ namespace ERP_System.Migrations
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("CurrentBalance")
+                    b.Property<decimal>("TaxPercentage")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -75,19 +74,19 @@ namespace ERP_System.Migrations
                         {
                             Id = 1,
                             BankName = "Cash",
-                            CurrentBalance = 0m
+                            TaxPercentage = 0m
                         },
                         new
                         {
                             Id = 2,
                             BankName = "EasyPaisa",
-                            CurrentBalance = 0m
+                            TaxPercentage = 0m
                         },
                         new
                         {
                             Id = 3,
                             BankName = "JazzCash",
-                            CurrentBalance = 0m
+                            TaxPercentage = 0m
                         });
                 });
 
@@ -150,8 +149,16 @@ namespace ERP_System.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -222,7 +229,7 @@ namespace ERP_System.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("FinalTotal")
+                    b.Property<decimal>("Discount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("OrderDate")
@@ -236,6 +243,9 @@ namespace ERP_System.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("UserId")
@@ -405,6 +415,47 @@ namespace ERP_System.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("ERP.API.Models.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Full System Access",
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Management and Reports Access",
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Limited Operational Access",
+                            Name = "HR"
+                        });
+                });
+
             modelBuilder.Entity("ERP.API.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -412,6 +463,12 @@ namespace ERP_System.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -422,32 +479,47 @@ namespace ERP_System.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
+                    b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
+                    b.HasIndex("RoleId");
+
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ERP.API.Models.UserPermission", b =>
+            modelBuilder.Entity("UserPermission", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("CanCreate")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanUpdate")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanView")
+                        .HasColumnType("bit");
 
                     b.Property<int>("PermissionId")
                         .HasColumnType("int");
@@ -508,13 +580,13 @@ namespace ERP_System.Migrations
                     b.HasOne("ERP.API.Models.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ERP.API.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Bank");
@@ -584,7 +656,18 @@ namespace ERP_System.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("ERP.API.Models.UserPermission", b =>
+            modelBuilder.Entity("ERP.API.Models.User", b =>
+                {
+                    b.HasOne("ERP.API.Models.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("UserPermission", b =>
                 {
                     b.HasOne("ERP.API.Models.Permission", "Permission")
                         .WithMany()
@@ -593,7 +676,7 @@ namespace ERP_System.Migrations
                         .IsRequired();
 
                     b.HasOne("ERP.API.Models.User", "User")
-                        .WithMany("UserPermissions")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -618,9 +701,9 @@ namespace ERP_System.Migrations
                     b.Navigation("OrderItems");
                 });
 
-            modelBuilder.Entity("ERP.API.Models.User", b =>
+            modelBuilder.Entity("ERP.API.Models.Role", b =>
                 {
-                    b.Navigation("UserPermissions");
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

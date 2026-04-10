@@ -4,6 +4,8 @@
     {
         public string Name { get; set; }
         public string Phone { get; set; }
-        public decimal Balance { get; set; } // Initial balance set karne ke liye
+        public string? Email { get; set; }    // Added
+        public string? Address { get; set; }  // Added
+        public decimal Balance { get; set; }
     }
 }

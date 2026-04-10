@@ -26,14 +26,14 @@ const CategoryManagement = () => {
   // --- DELETE FUNCTION ---
   const handleDelete = async (e, id) => {
     e.stopPropagation(); // Card click (navigate) ko rokne ke liye
-    if (!window.confirm("Kya aap is category ko delete karna chahte hain?")) return;
+    if (!window.confirm("Are you sure you want to delete?")) return;
 
     try {
       await api.delete(`/Category/${id}`);
       toast.success("Category delete ho gayi!");
       fetchCategories();
     } catch (err) {
-      toast.error("Delete nahi ho saka. Shayad ismein products majood hain.");
+      toast.error("Deleted Failed!");
     }
   };
 
@@ -47,19 +47,19 @@ const CategoryManagement = () => {
     );
 
     if (categoryExists) {
-      toast.error("Yeh Category pehle se majood hai (Small/Capital dono check kar liye)!");
+      toast.error("Category Already Exist (Small/Capital dono check kar liye)!");
       return;
     }
 
     setLoading(true);
     try {
       await api.post('/Category', { name: newCategory });
-      toast.success("Nayi category add ho gayi!");
+      toast.success("Category Added successfully!");
       setNewCategory("");
       setShowModal(false);
       fetchCategories();
     } catch (err) {
-      toast.error("Category add karne mein masla hua");
+      toast.error("Category Added Error");
     } finally { setLoading(false); }
   };
 

@@ -36,6 +36,39 @@ namespace ERP_System.Controllers
             return Ok(bank);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutBank(int id, [FromBody] Bank bank)
+        {
+            if (id != bank.Id) return BadRequest("ID Mismatch");
+
+            // Purana data check karne ke liye taake tracking issue na ho
+            var existingBank = await _context.Banks.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
+            if (existingBank == null) return NotFound("Bank nahi mila");
+
+            // Poore object ko modified mark karein
+            _context.Entry(bank).State = EntityState.Modified;
+
+            // IMPORTANT: Transactions ko update se exclude karne ke liye ye line use karein
+            // Kyunke collection update ke liye alag logic chahiye hota hai
+            _context.Entry(bank).Navigation("Transactions").IsModified = false;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BankExists(id)) return NotFound();
+                else throw;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+
+            return Ok(bank);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Bank>> GetBank(int id)
         {
@@ -55,11 +88,12 @@ namespace ERP_System.Controllers
             return Ok(new { message = "Bank successfully deleted" });
         }
 
-        // ==========================================
-        // NEW UPDATED CODE (FOR FRONTEND SYNC)
-        // ==========================================
+        private bool BankExists(int id)
+        {
+            return _context.Banks.Any(e => e.Id == id);
+        }
 
-        // 1. Transactions List fetch karne ke liye
+        // --- Transaction Methods (Same as before) ---
         [HttpGet("Transactions")]
         public async Task<ActionResult> GetTransactions()
         {
@@ -70,24 +104,21 @@ namespace ERP_System.Controllers
             return Ok(transactions);
         }
 
-        // 2. Transaction add karne aur Balance update karne ke liye
         [HttpPost("AddTransaction")]
         public async Task<IActionResult> AddTransaction([FromBody] BankTransaction transaction)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var bank = await _context.Banks.FindAsync(transaction.BankId);
-            if (bank == null) return NotFound("Bank nahi mila");
+            // Check karein ke bank exist karta hai ya nahi
+            var bankExists = await _context.Banks.AnyAsync(b => b.Id == transaction.BankId);
+            if (!bankExists) return NotFound("Bank nahi mila");
 
-            // Logic: Balance update karna
-            if (transaction.Type == "Credit")
-                bank.CurrentBalance += transaction.Amount;
-            else
-                bank.CurrentBalance -= transaction.Amount;
+            // Balance update logic yahan se remove kar diya gaya hai
+            transaction.TransactionDate = DateTime.Now;
 
-            transaction.TransactionDate = DateTime.Now; // Date set karna
             _context.BankTransactions.Add(transaction);
             await _context.SaveChangesAsync();
+
             return Ok(transaction);
         }
     }

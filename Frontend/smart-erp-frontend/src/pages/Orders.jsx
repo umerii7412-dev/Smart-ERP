@@ -8,7 +8,6 @@ const Orders = () => {
   const [customers, setCustomers] = useState([]);
   const [banks, setBanks] = useState([]);
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -18,6 +17,7 @@ const Orders = () => {
     bankId: '',
     paymentStatus: 'Paid',
     taxPercentage: 0,
+    discountPercentage: 0,
     totalAmount: 0,
     items: [] 
   });
@@ -28,362 +28,323 @@ const Orders = () => {
   }, []);
 
   const fetchOrders = async () => {
-    setLoading(true);
     try {
       const res = await api.get('/Order');
-      setOrders(res.data);
-    } catch (err) { 
-      toast.error("Orders load nahi ho sakay"); 
-      console.error(err);
-    } finally { 
-      setLoading(false); 
+      setOrders(res.data || []);
+    } catch (err) {
+      toast.error("Orders loading Failed");
     }
   };
 
   const fetchDropdownData = async () => {
     try {
       const [custRes, bankRes, prodRes] = await Promise.all([
-        api.get('/Customer'),
+        api.get('/Customers'),
         api.get('/Bank'),
         api.get('/Inventory')
       ]);
-      setCustomers(custRes.data);
-      setBanks(bankRes.data);
-      setProducts(prodRes.data);
-    } catch (err) { 
-      console.error("Dropdown data error:", err); 
+      setCustomers(custRes.data || []);
+      setBanks(bankRes.data || []);
+      setProducts(prodRes.data || []);
+    } catch (err) {
+      toast.error("Data loading failed!");
     }
   };
 
-  const addItem = () => {
-    setNewOrder(prev => ({
-      ...prev,
-      items: [...prev.items, { productId: '', quantity: 1, unitPrice: 0 }]
-    }));
+  const downloadAllOrdersCSV = () => {
+    if (orders.length === 0) return toast.error("No data to download");
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Order ID,Date,Customer,Subtotal,Discount,Tax,Final Total,Status\n";
+
+    orders.forEach(o => {
+      csvContent += `${o.id},${new Date(o.orderDate).toLocaleDateString()},${o.customerName},${o.subtotal},${o.discount},${o.taxAmount},${o.totalAmount},${o.paymentStatus}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "All_Orders_Report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const removeItem = (index) => {
-    const updatedItems = newOrder.items.filter((_, i) => i !== index);
-    calculateTotal(updatedItems, newOrder.taxPercentage);
+  const downloadSingleOrderCSV = (order) => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Product,Quantity,Price,Total\n";
+    (order.orderItems || []).forEach(it => {
+      csvContent += `${it.productName},${it.qtySold},${it.priceAtSale},${it.qtySold * it.priceAtSale}\n`;
+    });
+    csvContent += `\nSubtotal,,,${order.subtotal || 0}`;
+    csvContent += `\nDiscount,,,${order.discount || 0}`;
+    csvContent += `\nTax,,,${order.taxAmount || 0}`;
+    csvContent += `\nGrand Total,,,${order.totalAmount || order.finalTotal}`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Order_${order.id}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const calculateTotal = (items, bankId, discPercent) => {
+    const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.unitPrice || 0) * parseInt(item.quantity || 0)), 0);
+    
+    let taxRate = 0;
+    if (bankId) {
+      const selectedBank = banks.find(b => b.id === parseInt(bankId));
+      taxRate = selectedBank ? parseFloat(selectedBank.taxPercentage) : 0;
+    }
+
+    const discAmt = (subtotal * (parseFloat(discPercent) || 0)) / 100;
+    const taxableAmount = subtotal - discAmt;
+    const taxAmt = (taxableAmount * taxRate) / 100;
+    const finalTotal = taxableAmount + taxAmt;
+    
+    setNewOrder(prev => ({
+      ...prev,
+      items,
+      bankId,
+      taxPercentage: taxRate,
+      discountPercentage: discPercent,
+      totalAmount: finalTotal.toFixed(2)
+    }));
   };
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...newOrder.items];
-    
     if (field === 'productId') {
-      const selectedId = parseInt(value);
-      const prod = products.find(p => p.id === selectedId);
-      updatedItems[index].productId = selectedId;
-      updatedItems[index].unitPrice = prod ? parseFloat(prod.price) : 0;
-    } else if (field === 'quantity') {
-      updatedItems[index].quantity = value < 1 ? 1 : parseInt(value);
+      const prod = products.find(p => p.id === parseInt(value));
+      updatedItems[index] = {
+        ...updatedItems[index],
+        productId: value,
+        productName: prod?.name || '',
+        unitPrice: prod ? prod.price : 0
+      };
     } else {
       updatedItems[index][field] = value;
     }
-
-    calculateTotal(updatedItems, newOrder.taxPercentage);
-  };
-
-  const calculateTotal = (items, taxPercentage) => {
-    const subtotal = items.reduce((sum, item) => {
-      const price = parseFloat(item.unitPrice) || 0;
-      const qty = parseInt(item.quantity) || 0;
-      return sum + (qty * price);
-    }, 0);
-
-    const taxVal = parseFloat(taxPercentage) || 0;
-    const taxAmount = (subtotal * taxVal) / 100;
-    
-    setNewOrder(prev => ({
-      ...prev,
-      items: items,
-      taxPercentage: taxPercentage,
-      totalAmount: (subtotal + taxAmount).toFixed(2)
-    }));
+    calculateTotal(updatedItems, newOrder.bankId, newOrder.discountPercentage);
   };
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    if (newOrder.items.length === 0) return toast.error("Kam az kam ek item add karein!");
-    if (!newOrder.customerId || !newOrder.bankId) return toast.error("Customer aur Bank select karein!");
+    if (!newOrder.customerId || !newOrder.bankId || newOrder.items.length === 0) {
+      return toast.error("Please fill all required fields");
+    }
 
     try {
-      const subtotal = newOrder.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-      const taxAmt = (subtotal * parseFloat(newOrder.taxPercentage)) / 100;
+      const subtotalVal = newOrder.items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unitPrice)), 0);
+      const discAmt = (subtotalVal * parseFloat(newOrder.discountPercentage || 0)) / 100;
+      const taxableAmount = subtotalVal - discAmt;
+      const taxAmt = (taxableAmount * parseFloat(newOrder.taxPercentage || 0)) / 100;
 
-      const dataToSubmit = {
-        customerId: parseInt(newOrder.customerId),
-        bankId: parseInt(newOrder.bankId),
-        paymentStatus: newOrder.paymentStatus,
-        taxAmount: taxAmt,
-        totalAmount: parseFloat(newOrder.totalAmount),
-        items: newOrder.items.map(item => ({
-          productId: parseInt(item.productId),
-          quantity: parseInt(item.quantity),
-          unitPrice: parseFloat(item.unitPrice)
+      // ✅ Updated Payload to match Backend DTO Property Names Exactly
+      const payload = {
+        CustomerId: Number(newOrder.customerId),
+        BankId: Number(newOrder.bankId),
+        PaymentStatus: newOrder.paymentStatus,
+        Subtotal: parseFloat(subtotalVal.toFixed(2)),
+        Discount: parseFloat(discAmt.toFixed(2)),
+        TaxAmount: parseFloat(taxAmt.toFixed(2)),
+        TotalAmount: parseFloat(newOrder.totalAmount),
+        Items: newOrder.items.map(it => ({
+          ProductId: Number(it.productId),
+          Quantity: Number(it.quantity),
+          UnitPrice: parseFloat(it.unitPrice)
         }))
       };
 
-      await api.post('/Order/place-order', dataToSubmit);
-      toast.success("Order Successfully Placed!");
+      await api.post('/Order/place-order', payload);
+      toast.success("Order Placed!");
       setShowModal(false);
-      setNewOrder({ customerId: '', bankId: '', paymentStatus: 'Paid', taxPercentage: 0, totalAmount: 0, items: [] });
+      setNewOrder({ customerId: '', bankId: '', paymentStatus: 'Paid', taxPercentage: 0, discountPercentage: 0, totalAmount: 0, items: [] });
       fetchOrders();
-    } catch (err) { 
-      console.error(err);
-      toast.error(err.response?.data || "Order fail ho gaya"); 
+    } catch (err) {
+      console.error("Order Error Details:", err.response?.data);
+      toast.error("Error: Check Console");
     }
-  };
-
-  const openDetails = (order) => {
-    setSelectedOrder(order);
-    setShowDetailsModal(true);
   };
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-black text-slate-800">Advanced Sales Orders</h2>
-            <p className="text-slate-500 text-sm">Manage and track your customer shipments</p>
+      <div className="p-8 bg-[#f8fafc] min-h-screen">
+        <div className="flex justify-between items-center mb-10">
+          <h2 className="text-3xl font-black text-slate-800">Orders Management</h2>
+          <div className="flex gap-4">
+            <button 
+                onClick={downloadAllOrdersCSV}
+                className="bg-emerald-100 text-emerald-700 px-6 py-3 rounded-2xl font-bold border border-emerald-200 hover:bg-emerald-200 transition-all flex items-center gap-2"
+            >
+                <span className="text-xl">📊</span> DOWNLOAD REPORTS
+            </button>
+            <button onClick={() => setShowModal(true)} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg">
+                + NEW ORDER
+            </button>
           </div>
-          <button 
-            onClick={() => setShowModal(true)} 
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 transition-all"
-          >
-            + Create New Order
-          </button>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                <tr>
-                  <th className="p-4">Order ID</th>
-                  <th className="p-4">Customer</th>
-                  <th className="p-4">Total Amount</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-center">Actions</th>
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b">
+              <tr>
+                <th className="p-5 text-xs font-black text-slate-400 uppercase">ID</th>
+                <th className="p-5 text-xs font-black text-slate-400 uppercase">Customer</th>
+                <th className="p-5 text-xs font-black text-slate-400 uppercase">Total</th>
+                <th className="p-5 text-xs font-black text-slate-400 uppercase text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map(order => (
+                <tr key={order.id} className="border-b hover:bg-slate-50">
+                  <td className="p-5 font-bold text-blue-600">#ORD-{order.id}</td>
+                  <td className="p-5 font-bold text-slate-700">{order.customerName}</td>
+                  <td className="p-5 font-black text-slate-900">PKR {parseFloat(order.totalAmount || 0).toLocaleString()}</td>
+                  <td className="p-5 text-center flex justify-center gap-2">
+                    <button onClick={() => { setSelectedOrder(order); setShowDetailsModal(true); }} className="bg-blue-600 px-6 py-2 rounded-xl text-xs font-black text-white shadow-md">VIEW INVOICE</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {loading ? (
-                  <tr><td colSpan="5" className="p-20 text-center animate-pulse text-blue-500 font-bold">Connecting to Server...</td></tr>
-                ) : orders.length === 0 ? (
-                  <tr><td colSpan="5" className="p-20 text-center text-slate-400 font-medium">No orders found in database.</td></tr>
-                ) : orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-4 font-mono text-blue-600 font-bold">#ORD-{order.id}</td>
-                    <td className="p-4">
-                      <div className="font-semibold text-slate-700">
-                        {order.customerName || order.customer?.name || "Registered Client"}
-                      </div>
-                      <div className="text-[10px] text-slate-400 uppercase tracking-tighter">Registered Client</div>
-                    </td>
-                    <td className="p-4 font-black text-slate-800">
-                      {(order.totalAmount || order.finalTotal || 0).toLocaleString()}
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${
-                        order.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {order.paymentStatus}
-                      </span>
-                    </td>
-                    <td className="p-4 text-center">
-                      <button 
-                        onClick={() => openDetails(order)}
-                        className="bg-slate-100 text-slate-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all"
-                      >
-                        Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b flex justify-between items-center bg-white">
-              <div>
-                <h3 className="text-xl font-black text-slate-800">New Sales Order</h3>
-                <p className="text-xs text-slate-400">Fill in the details to generate invoice</p>
-              </div>
-              <button onClick={() => setShowModal(false)} className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all text-2xl">&times;</button>
+         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden">
+             <div className="p-6 border-b flex justify-between items-center">
+               <h3 className="text-xl font-black">New Sales Order</h3>
+               <button onClick={() => setShowModal(false)} className="text-2xl">&times;</button>
+             </div>
+             <form onSubmit={handlePlaceOrder} className="p-8 space-y-6">
+               <div className="grid grid-cols-2 gap-4">
+                 <select 
+                   required 
+                   className="border-2 border-slate-100 rounded-xl p-3 font-bold" 
+                   value={newOrder.customerId} 
+                   onChange={(e) => setNewOrder({...newOrder, customerId: e.target.value})}
+                 >
+                   <option value="">Select Customer</option>
+                  {/* ✅ Fix: Filter hata diya aur 'id' use kiya */}
+                  {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+                 
+                 <select required className="border-2 border-slate-100 rounded-xl p-3 font-bold" value={newOrder.bankId} onChange={(e) => calculateTotal(newOrder.items, e.target.value, newOrder.discountPercentage)}>
+                   <option value="">Bank/Cash</option>
+                   {banks.map(b => (
+                     <option key={b.id} value={b.id}>
+                       {b.bankName} ({b.taxPercentage}%)
+                     </option>
+                   ))}
+                 </select>
+               </div>
+
+               <div className="space-y-3">
+                 <div className="flex justify-between items-center">
+                     <label className="text-xs font-black text-slate-400 uppercase">Items List</label>
+                     <button type="button" onClick={() => setNewOrder(p => ({...p, items: [...p.items, {productId:'', quantity:1, unitPrice:0}]}))} className="text-blue-600 font-bold text-xs">+ ADD PRODUCT</button>
+                 </div>
+                 <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                     {newOrder.items.map((item, index) => (
+                     <div key={index} className="flex gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                         <select className="flex-1 bg-transparent font-bold text-sm outline-none" value={item.productId} onChange={(e) => handleItemChange(index, 'productId', e.target.value)}>
+                         <option value="">Select Product</option>
+                         {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                         </select>
+                         <input type="number" className="w-16 rounded-lg p-1 text-center font-bold border outline-none" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', e.target.value)} min="1" />
+                         <span className="w-24 text-xs font-black text-right text-slate-600">PKR {item.unitPrice}</span>
+                         <button type="button" onClick={() => {
+                             const filtered = newOrder.items.filter((_, i) => i !== index);
+                             calculateTotal(filtered, newOrder.bankId, newOrder.discountPercentage);
+                         }} className="text-red-400 ml-2">&times;</button>
+                     </div>
+                     ))}
+                 </div>
+               </div>
+
+               <div className="bg-slate-900 rounded-3xl p-6 text-white shadow-xl">
+                 <div className="flex justify-between items-center">
+                   <div className="w-1/3">
+                     <label className="text-[10px] font-black text-slate-400 uppercase">Discount (%)</label>
+                     <input type="number" className="w-full bg-slate-800 border-none rounded-lg p-2 mt-1 text-white font-bold outline-none" value={newOrder.discountPercentage} onChange={(e) => calculateTotal(newOrder.items, newOrder.bankId, e.target.value)} />
+                   </div>
+                   <div className="text-right">
+                     <p className="text-[10px] text-slate-400 font-bold uppercase">Payable Amount</p>
+                     <p className="text-3xl font-black text-blue-400">PKR {newOrder.totalAmount}</p>
+                     <p className="text-[10px] text-slate-500 italic">Tax Applied: {newOrder.taxPercentage}%</p>
+                   </div>
+                 </div>
+                 <button type="submit" className="w-full bg-blue-600 mt-6 p-4 rounded-2xl font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20">Save Order</button>
+               </div>
+             </form>
             </div>
-            
-            <form onSubmit={handlePlaceOrder} className="p-6 space-y-6 overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black text-slate-500 uppercase mb-1">Customer</label>
-                  <select 
-                    required className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-blue-500 transition-all bg-slate-50 font-semibold"
-                    value={newOrder.customerId}
-                    onChange={(e) => setNewOrder({...newOrder, customerId: e.target.value})}
-                  >
-                    <option value="">Select Customer</option>
-                    {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-black text-slate-500 uppercase mb-1">Deposit Account</label>
-                  <select 
-                    required className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-blue-500 transition-all bg-slate-50 font-semibold"
-                    value={newOrder.bankId}
-                    onChange={(e) => setNewOrder({...newOrder, bankId: e.target.value})}
-                  >
-                    <option value="">Select Bank/Cash</option>
-                    {banks.map(b => <option key={b.id} value={b.id}>{b.bankName}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-black text-slate-700 uppercase text-xs tracking-widest">Selected Items</h4>
-                  <button type="button" onClick={addItem} className="text-[10px] bg-slate-800 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-blue-600 transition-all tracking-tighter">+ ADD PRODUCT</button>
-                </div>
-                
-                {newOrder.items.length === 0 && (
-                  <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-2xl text-slate-400 text-sm">No items added yet</div>
-                )}
-
-                {newOrder.items.map((item, index) => (
-                  <div key={index} className="grid grid-cols-12 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 items-end relative group">
-                    <div className="col-span-12 md:col-span-6">
-                      <label className="text-[10px] uppercase font-black text-slate-400 mb-1 block">Product</label>
-                      <select 
-                        required className="w-full border-2 border-white rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-bold"
-                        value={item.productId}
-                        onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
-                      >
-                        <option value="">Select Product</option>
-                        {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price})</option>)}
-                      </select>
-                    </div>
-                    <div className="col-span-5 md:col-span-2">
-                      <label className="text-[10px] uppercase font-black text-slate-400 mb-1 block">Qty</label>
-                      <input 
-                        type="number" min="1" required className="w-full border-2 border-white rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-bold text-center"
-                        value={item.quantity}
-                        onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                      />
-                    </div>
-                    <div className="col-span-5 md:col-span-3">
-                      <label className="text-[10px] uppercase font-black text-slate-400 mb-1 block">Price</label>
-                      <input 
-                        type="text" readOnly className="w-full bg-white/50 border-2 border-transparent rounded-xl p-2.5 text-sm font-black text-slate-600"
-                        value={`${item.unitPrice}`}
-                      />
-                    </div>
-                    <div className="col-span-2 md:col-span-1">
-                      <button type="button" onClick={() => removeItem(index)} className="w-full bg-white text-red-500 hover:bg-red-500 hover:text-white h-10 rounded-xl shadow-sm transition-all flex items-center justify-center">🗑️</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-slate-50 rounded-2xl p-6 space-y-4 border border-slate-100">
-                <div className="flex justify-between items-end">
-                    <div className="w-1/3">
-                      <label className="block text-[10px] font-black text-slate-500 uppercase mb-1">Tax Percentage (%)</label>
-                      <input 
-                        type="number" className="w-full border-2 border-white rounded-xl p-2 text-sm outline-none font-bold"
-                        value={newOrder.taxPercentage}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          calculateTotal(newOrder.items, val);
-                        }}
-                      />
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total Payable</p>
-                      <p className="text-4xl font-black text-slate-800 tracking-tighter">{newOrder.totalAmount}</p>
-                    </div>
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <select 
-                    className="flex-1 border-2 border-slate-200 rounded-2xl p-4 font-black text-xs bg-white outline-none focus:border-blue-500"
-                    value={newOrder.paymentStatus}
-                    onChange={(e) => setNewOrder({...newOrder, paymentStatus: e.target.value})}
-                  >
-                    <option value="Paid">✅ FULLY PAID</option>
-                    <option value="Unpaid">❌ UNPAID</option>
-                    <option value="Partial">⚠️ PARTIAL</option>
-                  </select>
-                  <button type="submit" className="flex-[2] bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-widest text-xs">
-                    Confirm & Save Order
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
+         </div>
       )}
 
       {showDetailsModal && selectedOrder && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
-            <div className="p-6 border-b flex justify-between items-center bg-blue-600 text-white">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-200">
+            <div className="p-6 bg-blue-600 text-white flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-black">Order Details</h3>
-                <p className="text-xs opacity-80 uppercase tracking-tighter font-bold">ID: #ORD-{selectedOrder.id}</p>
+                  <h3 className="font-black text-lg">ORDER INVOICE</h3>
+                  <p className="text-[10px] font-bold opacity-80">ID: #ORD-{selectedOrder.id}</p>
               </div>
-              <button onClick={() => setShowDetailsModal(false)} className="text-4xl leading-none">&times;</button>
+              <div className="flex gap-2">
+                  <button onClick={() => downloadSingleOrderCSV(selectedOrder)} className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded-lg font-black shadow-sm">CSV</button>
+                  <button onClick={() => setShowDetailsModal(false)} className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center font-bold">&times;</button>
+              </div>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="flex justify-between items-center text-sm border-b pb-4">
-                <span className="text-slate-500 font-black uppercase text-[10px]">Customer:</span>
-                <span className="font-black text-slate-800 text-lg">
-                  {selectedOrder.customerName || selectedOrder.customer?.name || "N/A"}
-                </span>
+            <div className="p-8 space-y-6">
+              <div className="flex justify-between items-center border-b pb-4">
+                <span className="text-[10px] font-black text-slate-400 uppercase">Customer</span>
+                <span className="font-black text-slate-800 text-lg">{selectedOrder.customerName}</span>
               </div>
+              
               <div className="space-y-3">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Items Purchased:</p>
-                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
-                  {selectedOrder.orderItems?.length > 0 ? (
-                    selectedOrder.orderItems.map((item, i) => (
-                      <div key={i} className="flex justify-between items-center text-sm py-1 border-b last:border-0 border-slate-200 pb-2 last:pb-0">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-800">
-                            {item.productName || item.product?.name || `Product ID: ${item.productId}`}
-                          </span>
-                          <span className="text-[10px] font-black text-slate-400 uppercase">
-                            Qty: {item.qtySold || item.quantity} x {(item.priceAtSale || item.unitPrice || 0).toLocaleString()}
-                          </span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase">Purchased Items</span>
+                  <div className="bg-slate-50 rounded-2xl p-4 space-y-3 max-h-48 overflow-y-auto custom-scrollbar border border-slate-100">
+                    {(selectedOrder.orderItems || []).map((item, i) => (
+                    <div key={i} className="flex justify-between items-center text-xs">
+                        <div>
+                            <p className="font-black text-slate-800">{item.productName}</p>
+                            <p className="text-[10px] text-slate-400">Qty: x{item.qtySold}</p>
                         </div>
-                        <span className="font-black text-blue-600">
-                          {((item.qtySold || item.quantity) * (item.priceAtSale || item.unitPrice)).toLocaleString()}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-center text-slate-400 py-4 italic">No items detail found.</p>
-                  )}
+                        <span className="font-black text-slate-700">{(item.priceAtSale * item.qtySold).toLocaleString()}</span>
+                    </div>
+                    ))}
+                  </div>
+              </div>
+
+              <div className="pt-4 space-y-2 border-t border-dashed">
+                <div className="flex justify-between text-[11px] font-bold text-slate-500">
+                    <span>SUBTOTAL AMOUNT</span>
+                    <span>PKR {selectedOrder.subtotal?.toLocaleString() || 0}</span>
+                </div>
+                <div className="flex justify-between text-[11px] font-bold text-red-500">
+                    <span>DISCOUNT APPLIED ({((selectedOrder.discount / selectedOrder.subtotal) * 100).toFixed(0)}%) (-)</span>
+                    <span>PKR {selectedOrder.discount?.toLocaleString() || 0}</span>
+                </div>
+                <div className="flex justify-between text-[11px] font-bold text-slate-500">
+                    <span>SALES TAX ({((selectedOrder.taxAmount / (selectedOrder.subtotal - selectedOrder.discount)) * 100).toFixed(0)}%) (+)</span>
+                    <span>PKR {selectedOrder.taxAmount?.toLocaleString() || 0}</span>
+                </div>
+                
+                <div className="flex justify-between items-end pt-6 border-t mt-4">
+                  <div>
+                      <span className="font-black text-xs text-slate-400 block uppercase">Total Amount</span>
+                      <span className="text-4xl font-black text-blue-600 leading-none">
+                        PKR {parseFloat(selectedOrder.totalAmount || selectedOrder.finalTotal).toLocaleString()}
+                      </span>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-400 mb-1">PKR CURRENCY</span>
                 </div>
               </div>
-              <div className="flex justify-between items-center pt-4 border-t-2 border-dashed border-slate-100">
-                <span className="text-sm font-black text-slate-500 uppercase tracking-widest">Grand Total:</span>
-                <span className="text-3xl font-black text-slate-900 tracking-tighter">
-                  ${parseFloat(selectedOrder.finalTotal || selectedOrder.totalAmount || 0).toLocaleString()}
-                </span>
-              </div>
-            </div>
-            <div className="p-6 pt-0">
-              <button 
-                onClick={() => setShowDetailsModal(false)} 
-                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 transition-all"
-              >
-                Close Details
-              </button>
+              
+              <button onClick={() => setShowDetailsModal(false)} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest mt-4 hover:bg-black transition-colors">Close Invoice</button>
             </div>
           </div>
         </div>

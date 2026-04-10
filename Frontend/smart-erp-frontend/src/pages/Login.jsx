@@ -64,7 +64,7 @@ const Login = () => {
 
           <h1 className="text-3xl font-bold text-blue-600">Smart ERP</h1>
 
-          <p className="text-slate-500 mt-2">Apne account mein login karein</p>
+          <p className="text-slate-500 mt-2">Login your Account</p>
 
         </div>
 

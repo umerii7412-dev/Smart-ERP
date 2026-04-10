@@ -1,27 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, toggleUserStatus, registerUser } from '../api'; 
+// ✅ Humne getAllBaseRoles ko bhi import kiya
+import { getAllUsers, toggleUserStatus, registerUser, getUserPermissions, assignUserPermissions, getAllBaseRoles } from '../api'; 
 import Layout from '../components/Layout'; 
 import toast from 'react-hot-toast';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]); // ✅ Nayi state roles store karne ke liye
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   
-  // New User Form State
+  // --- NAYI STATES FOR PERMISSIONS ---
+  const [isPermModalOpen, setIsPermModalOpen] = useState(false); 
+  const [permissionsList, setPermissionsList] = useState([]); 
+  const [targetUser, setTargetUser] = useState(null); 
+
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'Employee'
+    roleId: 3 
   });
 
-  // Current User Role check
   const currentUserRole = localStorage.getItem('role');
   const isAdmin = currentUserRole === 'Admin';
 
   useEffect(() => {
     loadUsers();
+    loadRoles(); // ✅ Roles load karne ka function yahan call kiya
   }, []);
 
   const loadUsers = async () => {
@@ -29,9 +35,52 @@ const UserManagement = () => {
       const res = await getAllUsers();
       setUsers(res.data);
     } catch (err) {
-      toast.error("Users load nahi ho sakay");
+      toast.error("Users loading Error!");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ✅ Naya function roles ko backend se lane ke liye
+  const loadRoles = async () => {
+    try {
+      const res = await getAllBaseRoles();
+      setRoles(res.data);
+    } catch (err) {
+      console.error("Roles fetch error");
+    }
+  };
+
+  // --- PERMISSIONS FUNCTIONS ---
+
+  const handleOpenPermissions = async (user) => {
+    setTargetUser(user);
+    try {
+      const res = await getUserPermissions(user.userId);
+      setPermissionsList(res.data); 
+      setIsPermModalOpen(true);
+    } catch (err) {
+      toast.error("Permissions loading Error!");
+    }
+  };
+
+  const togglePermission = (id) => {
+    setPermissionsList(prev => prev.map(p => 
+      p.id === id ? { ...p, isAssigned: !p.isAssigned } : p
+    ));
+  };
+
+  const handleSavePermissions = async () => {
+    const assignedIds = permissionsList.filter(p => p.isAssigned).map(p => p.id);
+    try {
+      await assignUserPermissions({ 
+        userId: targetUser.userId, 
+        permissionIds: assignedIds 
+      });
+      toast.success("Permissions updated!");
+      setIsPermModalOpen(false);
+    } catch (err) {
+      toast.error("Update failed!");
     }
   };
 
@@ -41,7 +90,7 @@ const UserManagement = () => {
       await registerUser(newUser);
       toast.success("Naya user add ho gaya!");
       setShowModal(false);
-      setNewUser({ name: '', email: '', password: '', role: 'Employee' });
+      setNewUser({ name: '', email: '', password: '', roleId: 3 });
       loadUsers();
     } catch (err) {
       toast.error("User registration fail!");
@@ -50,7 +99,7 @@ const UserManagement = () => {
 
   const handleStatusChange = async (id) => {
     if (!isAdmin) {
-      toast.error("Sirf Admin block kar sakta hai");
+      toast.error("Only Admin can Block");
       return;
     }
     try {
@@ -71,7 +120,6 @@ const UserManagement = () => {
             <p className="text-slate-500 text-sm font-medium">Manage system access and permissions</p>
           </div>
           
-          {/* Add User Button - Sirf Admin ko dikhega */}
           {isAdmin && (
             <button 
               onClick={() => setShowModal(true)}
@@ -93,12 +141,12 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {users.map((user, index) => (
+              {users.map((user) => (
                 <tr key={user.userId} className="hover:bg-slate-50/50 transition-all group">
                   <td className="p-6">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black">
-                        {user.name.charAt(0).toUpperCase()}
+                        {user.name?.charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <p className="font-bold text-slate-800">{user.name}</p>
@@ -108,7 +156,7 @@ const UserManagement = () => {
                   </td>
                   <td className="p-6 text-center">
                     <span className="bg-slate-100 text-slate-600 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase">
-                      {user.role}
+                      {user.roleName || user.role?.name || 'Employee'}
                     </span>
                   </td>
                   <td className="p-6 text-center">
@@ -119,11 +167,11 @@ const UserManagement = () => {
                     </span>
                   </td>
                   <td className="p-6 text-right space-x-2">
-                    {/* Admin protection: Buttons hide for Admin role rows */}
-                    {user.role !== 'Admin' ? (
+                    {(user.roleName !== 'Admin' && user.role?.name !== 'Admin') ? (
                       <>
                         <button 
-                          className="px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all"
+                          onClick={() => handleOpenPermissions(user)}
+                          className="px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white transition-all"
                         >
                           Grant Permission
                         </button>
@@ -148,6 +196,58 @@ const UserManagement = () => {
           </table>
         </div>
 
+        {/* --- 🛡️ GRANT PERMISSION MODAL --- */}
+        {isPermModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+            <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+              
+              <div className="bg-blue-600 p-6 text-white flex justify-between items-center">
+                <div>
+                    <h2 className="text-xl font-black italic uppercase">Grant Permissions</h2>
+                    <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest">User: {targetUser?.name}</p>
+                </div>
+                <button onClick={() => setIsPermModalOpen(false)} className="text-2xl hover:scale-110 transition-transform">×</button>
+              </div>
+              
+              <div className="p-8 max-h-[400px] overflow-y-auto space-y-6">
+                 {Array.from(new Set(permissionsList.map(p => p.module))).map(moduleName => (
+                    <div key={moduleName} className="space-y-3">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{moduleName} System</h3>
+                        <div className="grid grid-cols-1 gap-2">
+                            {permissionsList.filter(p => p.module === moduleName).map(perm => (
+                                <label key={perm.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200">
+                                    <span className="text-sm font-bold text-slate-700">{perm.name.replace(/_/g, ' ')}</span>
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-5 h-5 rounded-lg border-slate-300 text-blue-600 focus:ring-blue-500"
+                                        checked={perm.isAssigned}
+                                        onChange={() => togglePermission(perm.id)}
+                                    />
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                 ))}
+              </div>
+
+              <div className="p-6 bg-slate-50 border-t flex gap-3">
+                <button 
+                  onClick={() => setIsPermModalOpen(false)}
+                  className="flex-1 py-4 text-xs font-black uppercase text-slate-400 hover:text-slate-600 transition-all"
+                >
+                  Discard
+                </button>
+                <button 
+                  onClick={handleSavePermissions}
+                  className="flex-[2] bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 transition-all shadow-blue-200"
+                >
+                  Save Access Rights
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* --- ADD USER MODAL --- */}
         {showModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -162,6 +262,7 @@ const UserManagement = () => {
                   <input 
                     required className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="Enter name"
+                    value={newUser.name}
                     onChange={(e) => setNewUser({...newUser, name: e.target.value})}
                   />
                 </div>
@@ -170,6 +271,7 @@ const UserManagement = () => {
                   <input 
                     required type="email" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="email@example.com"
+                    value={newUser.email}
                     onChange={(e) => setNewUser({...newUser, email: e.target.value})}
                   />
                 </div>
@@ -178,18 +280,23 @@ const UserManagement = () => {
                   <input 
                     required type="password" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="••••••••"
+                    value={newUser.password}
                     onChange={(e) => setNewUser({...newUser, password: e.target.value})}
                   />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Role</label>
                   <select 
-                    className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold outline-none"
-                    onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                    className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold outline-none cursor-pointer"
+                    value={newUser.roleId}
+                    onChange={(e) => setNewUser({...newUser, roleId: parseInt(e.target.value)})}
                   >
-                    <option value="Employee">Employee</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Admin">Admin</option>
+                    {/* ✅ Yahan roles state ko map kiya hai taake naya role nazar aaye */}
+                    {roles.map((role) => (
+                      <option key={role.id} value={role.id}>
+                        {role.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 transition-all">

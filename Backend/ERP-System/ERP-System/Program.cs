@@ -19,7 +19,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // ==========================================
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "SmartERP_Secure_Key_32_Chars_Long_!!!";
 var keyBytes = Encoding.ASCII.GetBytes(jwtKey);
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -85,10 +84,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
         policy => policy
-            .WithOrigins("http://localhost:5173") // Aapka exact React URL
+            .WithOrigins("http://localhost:5173", "http://localhost:5174")
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials()); // Preflight checks ke liye behtar hai
+            .AllowCredentials());
 });
 
 var app = builder.Build();
@@ -103,14 +102,16 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
-app.UseHttpsRedirection();
+// ✅ Change 1: Isay comment kiya gaya hai taake "Redirect is not allowed" ka error khatam ho sakay
+// app.UseHttpsRedirection(); 
 
-// CORS hamesha Authentication aur Authorization se pehle hona chahiye
+app.UseRouting();
+
+// ✅ Change 2: UseCors ko hamesha UseRouting ke baad aur UseAuthentication se pehle hona chahiye
 app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();

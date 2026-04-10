@@ -9,13 +9,12 @@ namespace ERP.API.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(100)]
-        public string BankName { get; set; } // e.g., "Meezan Bank", "EasyPaisa"
+        public string BankName { get; set; }
 
         [Required]
-        public decimal CurrentBalance { get; set; } = 0; // Har bank ka apna balance
+        public decimal TaxPercentage { get; set; }
 
-        // Relationship: Ek bank ki bahut si transactions ho sakti hain
-        public virtual ICollection<BankTransaction> Transactions { get; set; }
+        // Navigation Property
+        public virtual ICollection<BankTransaction>? Transactions { get; set; }
     }
 }

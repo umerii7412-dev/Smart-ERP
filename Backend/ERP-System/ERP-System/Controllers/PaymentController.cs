@@ -39,7 +39,7 @@ namespace ERP_System.Controllers
                 };
 
                 // Customer ka Balance Update Karein
-                var customer = await _context.Customers.FindAsync(dto.CustomerId);
+                var customer = await _context.Users.FindAsync(dto.CustomerId);
                 if (customer == null) return NotFound("Customer nahi mila.");
 
                 // Logic: Pehle balance negative tha (Udhaar), ab Amount add karne se wo zero ki taraf jaye ga

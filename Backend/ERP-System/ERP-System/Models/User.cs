@@ -1,29 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace ERP.API.Models
+﻿namespace ERP.API.Models
 {
     public class User
     {
-        [Key]
         public int UserId { get; set; }
+        public string Name { get; set; } = string.Empty; // Warning fix
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public int RoleId { get; set; }
+        public bool IsActive { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
+        // Ye properties add karein
+        public string? Phone { get; set; } // Nullable (?) taake warning na aaye
+        public string? Address { get; set; }
+        public decimal Balance { get; set; }
 
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-
-        [Required]
-        public string Password { get; set; } // Yaad rahe: Password humesha hash kar ke save karenge
-
-        [Required]
-        public string Role { get; set; } // "Admin" ya "Employee"
-
-        public bool IsActive { get; set; } = true;
-
-        // Navigation Properties (Relations)
-        public virtual ICollection<UserPermission> UserPermissions { get; set; }
+        public Role? Role { get; set; }
     }
 }

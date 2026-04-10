@@ -6,7 +6,7 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const userRole = localStorage.getItem('role') || 'User';
+  const userRole = localStorage.getItem('role') || 'User'; 
   const userName = localStorage.getItem('userName') || 'System User';
 
   const handleLogout = () => {
@@ -14,15 +14,17 @@ const Layout = ({ children }) => {
     navigate('/login');
   };
 
-  // Menu items - Reporting ka path yahan fix kiya gaya hai
+  // Menu items - Updated label to 'Roles'
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: '🏠', adminOnly: false },
     { name: 'Users', path: '/users', icon: '🛡️', adminOnly: true },
+    { name: 'Roles', path: '/roles', icon: '🔑', adminOnly: true }, // Updated name
     { name: 'Bank', path: '/bank', icon: '💎', adminOnly: true },
     { name: 'Inventory', path: '/inventory', icon: '📦', adminOnly: false },
     { name: 'Categories', path: '/categories', icon: '📑', adminOnly: false }, 
+    { name: 'Customers', path: '/customers', icon: '👥', adminOnly: false },
     { name: 'Orders', path: '/orders', icon: '🛍️', adminOnly: false },
-    { name: 'Reporting', path: '/reporting', icon: '📊', adminOnly: true }, // ✅ Fixed: Added '/'
+    { name: 'Reporting', path: '/reporting', icon: '📊', adminOnly: true },
   ];
 
   return (
@@ -33,9 +35,8 @@ const Layout = ({ children }) => {
           {isSidebarOpen ? 'SMART ERP' : 'ERP'}
         </div>
 
-        <nav className="flex-1 mt-6 px-3 space-y-2 overflow-y-auto">
+        <nav className="flex-1 mt-6 px-3 space-y-2 overflow-y-auto small-scrollbar">
           {menuItems.map((item) => {
-            // Admin only check taake unauthorised user ko menu nazar na aaye
             if (item.adminOnly && userRole !== 'Admin') return null;
 
             return (
@@ -48,7 +49,7 @@ const Layout = ({ children }) => {
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <span className="text-xl">{item.icon}</span>
+                <span className="text-xl group-hover:scale-110 transition-transform">{item.icon}</span>
                 {isSidebarOpen && <span className="font-semibold">{item.name}</span>}
               </Link>
             );
@@ -83,7 +84,9 @@ const Layout = ({ children }) => {
           <div className="flex items-center gap-4 group cursor-pointer p-1 pr-4 rounded-full hover:bg-slate-50 transition-all">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-slate-800 leading-none">{userName}</p>
-              <span className="text-[10px] text-blue-600 font-black uppercase tracking-widest">{userRole}</span>
+              <span className="text-[10px] text-blue-600 font-black uppercase tracking-widest">
+                {userRole}
+              </span>
             </div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200 group-hover:rotate-6 transition-transform text-lg uppercase">
               {userName.charAt(0)}
