@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api, { getCustomers, addCustomer } from '../api'; 
 import Layout from '../components/Layout';
 import toast from 'react-hot-toast';
+import { Pencil, Trash2 } from 'lucide-react';
 
 const CustomerManagement = () => {
   const [customers, setCustomers] = useState([]);
@@ -127,12 +128,12 @@ const CustomerManagement = () => {
               )}
             </div>
 
-            <button 
-              onClick={() => { setEditingCustomer(null); setFormData(initialForm); setShowModal(true); }}
-              className="bg-[#3da9f5] text-white px-6 py-2 rounded-xl font-bold hover:bg-[#2980b9] transition-all shadow-lg shadow-[#3da9f5]/20 whitespace-nowrap"
-            >
-              + Add New
-            </button>
+           <button 
+  onClick={() => { setEditingCustomer(null); setFormData(initialForm); setShowModal(true); }}
+  className="bg-[#003354] text-white px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-[#003354]/10 whitespace-nowrap uppercase tracking-widest text-xs"
+>
+  + Add New
+</button>
           </div>
         </div>
 
@@ -172,22 +173,31 @@ const CustomerManagement = () => {
                   <td className={`p-4 text-sm font-black ${customer.balance < 0 ? 'text-[#e74c3c]' : 'text-[#27ae60]'}`}>
                     Rs. {Number(customer.balance).toLocaleString() || 0}
                   </td>
-                  <td className="p-4 text-center pr-6">
-                    <div className="flex justify-center gap-2">
-                      <button 
-                        onClick={() => { setEditingCustomer(customer); setFormData({...customer}); setShowModal(true); }}
-                        className="p-2 text-[#3da9f5] hover:bg-[#3da9f5]/10 rounded-lg transition-colors"
-                      >
-                        ✏️
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(customer.id)}
-                        className="p-2 text-[#e74c3c] hover:bg-[#e74c3c]/10 rounded-lg transition-colors"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
+                 <td className="p-4 text-center pr-6">
+  <div className="flex justify-center gap-3">
+    {/* Professional Edit Button - Navy Blue */}
+    <button 
+      onClick={() => { 
+        setEditingCustomer(customer); 
+        setFormData({...customer}); 
+        setShowModal(true); 
+      }}
+      className="p-2 text-[#003354] bg-[#003354]/5 hover:bg-[#003354]/10 rounded-lg transition-all active:scale-90"
+      title="Edit Customer"
+    >
+      <Pencil size={18} strokeWidth={2.5} />
+    </button>
+
+    {/* Professional Delete Button - Red */}
+    <button 
+      onClick={() => handleDelete(customer.id)}
+      className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all active:scale-90"
+      title="Delete Customer"
+    >
+      <Trash2 size={18} strokeWidth={2.5} />
+    </button>
+  </div>
+</td>
                 </tr>
               ))}
             </tbody>

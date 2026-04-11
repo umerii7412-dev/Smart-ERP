@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import Layout from '../components/Layout';
 import toast from 'react-hot-toast';
+import { Download, RefreshCw } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   ResponsiveContainer, PieChart, Pie, Cell 
@@ -110,18 +111,23 @@ const Reporting = () => {
             <p className="text-slate-400 font-medium tracking-tight">Real-time business insights & system analytics</p>
           </div>
           <div className="flex gap-2">
-            <button 
-              onClick={handleDownloadCSV} 
-              className="bg-slate-700 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2"
-            >
-              <span>📥</span> Export CSV
-            </button>
-            <button 
-              onClick={fetchAllReports} 
-              className="bg-[#003354] text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-[#003354]/20 flex items-center gap-2"
-            >
-              <span>🔄</span> Refresh Data
-            </button>
+           {/* Export CSV Button */}
+<button 
+  onClick={handleDownloadCSV} 
+  className="bg-white text-slate-700 border border-slate-200 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2 active:scale-95 group"
+>
+  <Download size={18} strokeWidth={2.5} className="text-slate-500 group-hover:text-slate-800 transition-colors" />
+  <span className="uppercase text-[11px] tracking-widest font-black">Export CSV</span>
+</button>
+
+{/* Refresh Data Button */}
+<button 
+  onClick={fetchAllReports} 
+  className="bg-[#003354] text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-95 transition-all shadow-lg shadow-[#003354]/20 flex items-center gap-2 active:scale-95 group"
+>
+  <RefreshCw size={18} strokeWidth={2.5} className="group-hover:rotate-180 transition-transform duration-500" />
+  <span className="uppercase text-[11px] tracking-widest font-black">Refresh Data</span>
+</button>
           </div>
         </div>
 

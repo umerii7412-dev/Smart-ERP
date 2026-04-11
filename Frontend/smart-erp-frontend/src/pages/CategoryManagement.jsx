@@ -66,7 +66,7 @@ const CategoryManagement = () => {
       <div className="p-8 bg-[#F8FAFC] min-h-screen space-y-8 animate-in fade-in duration-500">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 tracking-tight uppercase">
+            <h1 className="text-3xl font-bold text-[#003354] tracking-tight uppercase">
               Categories
             </h1>
             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -74,10 +74,10 @@ const CategoryManagement = () => {
             </p>
           </div>
           
-          {/* UPDATED: Add Category Button Color & Text Case */}
+          {/* UPDATED: Button color to Navy Blue */}
           <button 
             onClick={() => setShowModal(true)}
-            className="bg-[#3da9f5] text-white px-8 py-3 rounded-2xl text-xs font-black !normal-case tracking-widest shadow-xl shadow-blue-100 hover:bg-[#2980b9] transition-all flex items-center gap-2"
+            className="bg-[#003354] text-white px-8 py-3 rounded-2xl text-xs font-black tracking-widest shadow-xl shadow-slate-200 hover:opacity-90 transition-all flex items-center gap-2 uppercase"
           >
             <Plus size={16} /> Add Category
           </button>
@@ -88,7 +88,7 @@ const CategoryManagement = () => {
             <div 
               key={cat.id} 
               onClick={() => navigate('/inventory', { state: { categoryName: cat.name } })}
-              className="bg-white p-6 rounded-[28px] border border-[#ecf0f1] shadow-sm hover:shadow-md hover:border-[#3da9f5] cursor-pointer transition-all group relative overflow-hidden"
+              className="bg-white p-6 rounded-[28px] border border-[#ecf0f1] shadow-sm hover:shadow-md hover:border-[#003354] cursor-pointer transition-all group relative overflow-hidden"
             >
               <button 
                 onClick={(e) => handleDelete(e, cat.id)}
@@ -97,14 +97,14 @@ const CategoryManagement = () => {
                 <Trash2 size={16} />
               </button>
 
-              {/* UPDATED: Icon Color to Sky Blue */}
-              <div className="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 text-[#3da9f5] group-hover:bg-[#3da9f5] group-hover:text-white transition-colors">
+              {/* UPDATED: Icon Color to Navy Blue */}
+              <div className="bg-slate-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 text-[#003354] group-hover:bg-[#003354] group-hover:text-white transition-colors">
                 <Tag size={20} />
               </div>
               <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">{cat.name}</h3>
               <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">View Products</p>
               
-              <div className="absolute -right-4 -bottom-4 w-12 h-12 bg-slate-50 rounded-full group-hover:bg-blue-50 transition-colors"></div>
+              <div className="absolute -right-4 -bottom-4 w-12 h-12 bg-slate-50 rounded-full group-hover:bg-slate-100 transition-colors"></div>
             </div>
           ))}
         </div>
@@ -113,7 +113,7 @@ const CategoryManagement = () => {
         {showModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300">
-              <div className="bg-slate-900 p-8 text-white">
+              <div className="bg-[#003354] p-8 text-white">
                 <h2 className="text-xl font-black italic uppercase tracking-tighter text-center">New Category</h2>
               </div>
               <form onSubmit={handleAddCategory} className="p-8 space-y-6">
@@ -121,16 +121,16 @@ const CategoryManagement = () => {
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Category Name</label>
                   <input 
                     required 
-                    className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-2 text-sm font-bold focus:ring-2 focus:ring-[#3da9f5] outline-none"
+                    className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-2 text-sm font-bold focus:ring-2 focus:ring-[#003354] outline-none"
                     placeholder="e.g. Electronics"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
                   />
                 </div>
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-xs font-black uppercase text-slate-400">Cancel</button>
-                  {/* UPDATED: Modal Button Color */}
-                  <button type="submit" disabled={loading} className="flex-1 bg-[#3da9f5] text-white py-4 rounded-2xl font-black !normal-case text-xs shadow-lg shadow-blue-100 hover:bg-[#2980b9]">
+                  <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-xs font-black uppercase text-slate-400 hover:text-slate-600 transition-colors">Cancel</button>
+                  {/* UPDATED: Modal Save Button Color */}
+                  <button type="submit" disabled={loading} className="flex-1 bg-[#003354] text-white py-4 rounded-2xl font-black text-xs shadow-lg shadow-slate-200 hover:opacity-90 uppercase tracking-widest">
                     {loading ? "Saving..." : "Save Category"}
                   </button>
                 </div>

@@ -131,12 +131,12 @@ const Inventory = () => {
             <input type="text" placeholder="Search..." className="border border-slate-200 rounded-xl px-4 py-2 w-full md:w-64 outline-none shadow-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             
             {/* UPDATED ADD PRODUCT BUTTON */}
-            <button 
-              onClick={() => setShowModal(true)} 
-              className="bg-[#3da9f5] text-white px-6 py-2.5 rounded-2xl font-black shadow-lg hover:bg-[#2980b9] transition-all active:scale-95 !normal-case text-sm flex items-center gap-2"
-            >
-              <Plus size={18} /> Add Product
-            </button>
+           <button 
+  onClick={() => setShowModal(true)} 
+  className="bg-[#003354] text-white px-6 py-2.5 rounded-2xl font-black shadow-lg hover:opacity-90 transition-all active:scale-95 uppercase tracking-widest text-xs flex items-center gap-2"
+>
+  <Plus size={18} /> Add Product
+</button>
           </div>
         </div>
 

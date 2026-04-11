@@ -111,37 +111,36 @@ const UserManagement = () => {
       <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-black text-[#2c3e50]">User Control Center</h1>
+            <h1 className="text-2xl font-black text-[#003354]">User Control Center</h1>
             <p className="text-[#95a5a6] text-sm font-medium mt-1">Manage system access and permissions</p>
           </div>
           
           {isAdmin && (
             <button 
-  onClick={() => setShowModal(true)}
-  className="bg-[#3da9f5] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg hover:bg-[#2980b9] transition-all active:scale-95 capitalize tracking-wider"
->
-  + Create New User
-</button>
+              onClick={() => setShowModal(true)}
+              className="bg-[#003354] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg hover:opacity-90 transition-all active:scale-95 capitalize tracking-wider"
+            >
+              + Create New User
+            </button>
           )}
         </div>
 
         <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
           <table className="w-full text-left border-collapse">
-            {/* Table Header - Sky Blue Background and Bold Black Text */}
-           <thead className="erp-table-header">
-    <tr className="text-[11px] font-[950] uppercase text-white tracking-[0.2em] border-b border-white/10">
-        <th className="p-6 font-black text-left">User Info</th>
-        <th className="p-6 text-center font-black">Designation / Role</th>
-        <th className="p-6 text-center font-black">Status</th>
-        <th className="p-6 text-right font-black">Actions</th>
-    </tr>
-</thead>
+            <thead className="bg-[#003354]">
+              <tr className="text-[11px] font-[950] uppercase text-white tracking-[0.2em] border-b border-white/10">
+                <th className="p-6 font-black text-left">User Info</th>
+                <th className="p-6 text-center font-black">Designation / Role</th>
+                <th className="p-6 text-center font-black">Status</th>
+                <th className="p-6 text-right font-black">Actions</th>
+              </tr>
+            </thead>
             <tbody className="divide-y divide-slate-50">
               {users.map((user) => (
-                <tr key={user.userId} className="hover:bg-[#f5f7fa] transition-all group border-b border-[#ecf0f1]">
+                <tr key={user.userId} className="hover:bg-slate-50 transition-all group border-b border-[#ecf0f1]">
                   <td className="p-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-8 rounded-lg  bg-opacity-10 text-[#3da9f5] flex items-center justify-center font-bold">
+                      <div className="w-10 h-8 rounded-lg bg-slate-100 text-[#003354] flex items-center justify-center font-bold">
                         {user.name?.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -165,24 +164,27 @@ const UserManagement = () => {
                   <td className="p-6 text-right space-x-2">
                     {(user.roleName !== 'Admin' && user.role?.name !== 'Admin') ? (
                       <>
-                        {/* Grant Permission Button - Same Sky Blue */}
                         <button 
                           onClick={() => handleOpenPermissions(user)}
-                          className="px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-[#3da9f5] text-white hover:bg-[#2980b9] transition-all shadow-sm"
+                          className="px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-[#003354] text-white hover:opacity-90 transition-all shadow-sm"
                         >
                           Grant Permission
                         </button>
+                        
+                        {/* UPDATED: Red Block Button */}
                         <button 
                           onClick={() => handleStatusChange(user.userId)}
-                          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${
-                            user.isActive ? 'bg-slate-800 text-white hover:bg-red-600' : 'bg-[#3da9f5] text-white'
+                          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-sm ${
+                            user.isActive 
+                              ? 'bg-red-600 text-white hover:bg-red-700' 
+                              : 'bg-[#003354] text-white hover:opacity-90'
                           }`}
                         >
                           {user.isActive ? 'Block Access' : 'Unblock Access'}
                         </button>
                       </>
                     ) : (
-                      <span className="text-[10px] font-black text-slate-300 uppercase italic px-4">
+                      <span className="text-slate-300 text-[10px] font-black uppercase italic px-4">
                         System Protected
                       </span>
                     )}
@@ -197,7 +199,7 @@ const UserManagement = () => {
         {isPermModalOpen && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
             <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden">
-              <div className="bg-[#3da9f5] p-6 text-white flex justify-between items-center">
+              <div className="bg-[#003354] p-6 text-white flex justify-between items-center">
                 <div>
                     <h2 className="text-xl font-black uppercase">Grant Permissions</h2>
                     <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest">User: {targetUser?.name}</p>
@@ -214,7 +216,7 @@ const UserManagement = () => {
                                     <span className="text-sm font-bold text-slate-700">{perm.name.replace(/_/g, ' ')}</span>
                                     <input 
                                         type="checkbox" 
-                                        className="w-5 h-5 rounded-lg border-slate-300 text-[#3da9f5] focus:ring-[#3da9f5]"
+                                        className="w-5 h-5 rounded-lg border-slate-300 text-[#003354] focus:ring-[#003354]"
                                         checked={perm.isAssigned}
                                         onChange={() => togglePermission(perm.id)}
                                     />
@@ -233,7 +235,7 @@ const UserManagement = () => {
                 </button>
                 <button 
                   onClick={handleSavePermissions}
-                  className="flex-[2] bg-[#3da9f5] text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-[#2980b9] transition-all"
+                  className="flex-[2] bg-[#003354] text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:opacity-90 transition-all"
                 >
                   Save Access Rights
                 </button>
@@ -246,32 +248,32 @@ const UserManagement = () => {
         {showModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden">
-              <div className="bg-[#3da9f5] p-6 text-white flex justify-between items-center">
+              <div className="bg-[#003354] p-6 text-white flex justify-between items-center">
                 <h2 className="text-xl font-black uppercase tracking-tight">Register New User</h2>
                 <button onClick={() => setShowModal(false)} className="text-2xl hover:rotate-90 transition-transform">×</button>
               </div>
               <form onSubmit={handleAddUser} className="p-8 space-y-5">
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Full Name</label>
-                  <input required className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#3da9f5] outline-none" value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value})} />
+                  <input required className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#003354] outline-none" value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Email</label>
-                  <input required type="email" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#3da9f5] outline-none" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} />
+                  <input required type="email" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#003354] outline-none" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Password</label>
-                  <input required type="password" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#3da9f5] outline-none" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} />
+                  <input required type="password" className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold focus:ring-2 focus:ring-[#003354] outline-none" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Role</label>
-                  <select className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold outline-none cursor-pointer" value={newUser.roleId} onChange={(e) => setNewUser({...newUser, roleId: parseInt(e.target.value)})}>
+                  <select className="w-full bg-slate-50 border-none rounded-2xl p-4 mt-1 text-sm font-bold outline-none cursor-pointer focus:ring-2 focus:ring-[#003354]" value={newUser.roleId} onChange={(e) => setNewUser({...newUser, roleId: parseInt(e.target.value)})}>
                     {roles.map((role) => (
                       <option key={role.id} value={role.id}>{role.name}</option>
                     ))}
                   </select>
                 </div>
-                <button type="submit" className="w-full bg-[#3da9f5] text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-[#2980b9] transition-all">
+                <button type="submit" className="w-full bg-[#003354] text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:opacity-90 transition-all">
                   Add User
                 </button>
               </form>

@@ -90,11 +90,12 @@ const Roles = () => {
         <Layout>
             <div className="p-6 min-h-screen bg-gray-50/50">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-2xl font-bold text-slate-800 uppercase tracking-tight">System Management</h1>
-                    {/* Add Role Button */}
+                    <h1 className="text-2xl font-bold text-[#003354] uppercase tracking-tight">System Management</h1>
+                    
+                    {/* UPDATED: Add Role Button Color */}
                     <button 
                         onClick={() => setIsModalOpen(true)} 
-                        className="bg-[#3da9f5] text-white px-8 py-2.5 rounded-xl font-bold uppercase text-[11px] tracking-widest shadow-lg shadow-blue-100 hover:bg-[#3498db] transition-all active:scale-95"
+                        className="bg-[#003354] text-white px-8 py-2.5 rounded-xl font-bold uppercase text-[11px] tracking-widest shadow-lg shadow-slate-200 hover:opacity-90 transition-all active:scale-95"
                     >
                         + Add Role
                     </button>
@@ -102,32 +103,33 @@ const Roles = () => {
 
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <table className="min-w-full">
-                        {/* Table Header - Matching Button Color exactly */}
-                        <thead className="erp-table-header">
-    <tr>
-        <th className="px-6 py-4 text-left text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Role Name</th>
-        <th className="px-6 py-4 text-center text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Total Users</th>
-        <th className="px-6 py-4 text-center text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Actions</th>
-    </tr>
-</thead>
+                        {/* UPDATED: Table Header with Navy Blue */}
+                        <thead className="bg-[#003354]">
+                            <tr>
+                                <th className="px-6 py-4 text-left text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Role Name</th>
+                                <th className="px-6 py-4 text-center text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Total Users</th>
+                                <th className="px-6 py-4 text-center text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Actions</th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-slate-100">
                             {roles.map((role) => {
                                 const name = role.roleName || role.name;
                                 const isSystemRole = name.toLowerCase() === 'admin';
                                 
                                 return (
-                                    <tr key={role.id || role.roleId} className="hover:bg-blue-50/20 transition-colors">
+                                    <tr key={role.id || role.roleId} className="hover:bg-slate-50 transition-colors">
                                         <td className="px-6 py-5 font-bold text-slate-700 uppercase text-sm">{name}</td>
                                         <td className="px-6 py-5 text-center">
-                                            <span className="bg-blue-50 text-[#3da9f5] px-4 py-1.5 rounded-full text-[11px] font-bold border border-blue-100">
+                                            {/* UPDATED: Member Badge Color */}
+                                            <span className="bg-slate-100 text-[#003354] px-4 py-1.5 rounded-full text-[11px] font-bold border border-slate-200">
                                                 {getRoleCount(name)} Members
                                             </span>
                                         </td>
                                         <td className="px-6 py-5 text-center space-x-2">
                                             {!isSystemRole ? (
                                                 <div className="flex justify-center gap-2">
-                                                    {/* Edit Button - Same color as Add Role */}
-                                                    <button onClick={() => openEditModal(role)} className="bg-[#3da9f5] text-white px-4 py-2 rounded-lg hover:bg-[#3498db] font-bold transition-all text-[10px] uppercase shadow-sm">Edit</button>
+                                                    {/* UPDATED: Edit Button Color */}
+                                                    <button onClick={() => openEditModal(role)} className="bg-[#003354] text-white px-4 py-2 rounded-lg hover:opacity-90 font-bold transition-all text-[10px] uppercase shadow-sm">Edit</button>
                                                     <button onClick={() => handleDelete(role)} className="text-red-600 bg-red-50 px-4 py-2 rounded-lg hover:bg-red-100 font-bold transition-all text-[10px] uppercase">Delete</button>
                                                 </div>
                                             ) : (
@@ -145,7 +147,8 @@ const Roles = () => {
                 {isModalOpen && (
                     <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 backdrop-blur-sm p-4">
                         <div className="bg-white rounded-[30px] w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden">
-                            <div className="bg-[#3da9f5] p-6 text-white flex justify-between items-center">
+                            {/* UPDATED: Modal Header Background */}
+                            <div className="bg-[#003354] p-6 text-white flex justify-between items-center">
                                 <h2 className="text-sm font-bold uppercase tracking-widest">{editingRole ? "Update Role" : "Add New Role"}</h2>
                                 <button onClick={closeModal} className="hover:rotate-90 transition-transform"><X size={20} /></button>
                             </div>
@@ -153,7 +156,7 @@ const Roles = () => {
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Role Name</label>
                                     <input 
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 font-bold outline-none focus:border-[#3da9f5] transition-all text-slate-800"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 font-bold outline-none focus:border-[#003354] transition-all text-slate-800"
                                         value={roleName}
                                         onChange={(e) => setRoleName(e.target.value)}
                                         placeholder="Enter name..."
@@ -162,7 +165,8 @@ const Roles = () => {
                                 </div>
                                 <div className="flex gap-3">
                                     <button type="button" onClick={closeModal} className="flex-1 py-3 text-[11px] font-bold uppercase text-slate-400">Cancel</button>
-                                    <button type="submit" className="flex-[2] bg-[#3da9f5] text-white py-3 rounded-xl font-bold uppercase text-[11px] tracking-widest shadow-lg shadow-blue-50 hover:bg-[#3498db] transition-all">
+                                    {/* UPDATED: Modal Action Button Color */}
+                                    <button type="submit" className="flex-[2] bg-[#003354] text-white py-3 rounded-xl font-bold uppercase text-[11px] tracking-widest shadow-lg shadow-slate-100 hover:opacity-90 transition-all">
                                         {editingRole ? "Save Changes" : "Create Role"}
                                     </button>
                                 </div>

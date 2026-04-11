@@ -56,107 +56,107 @@ const BankManagement = () => {
     }
   };
 
-  if (loading) return <Layout><div className="flex h-[60vh] items-center justify-center"><Loader2 className="animate-spin text-[#3498db]" size={40}/></div></Layout>;
+  if (loading) return <Layout><div className="flex h-[60vh] items-center justify-center"><Loader2 className="animate-spin text-[#003354]" size={40}/></div></Layout>;
 
   return (
     <Layout>
-      <div className="space-y-10">
-        {/* Header Section - Lightened Weight */}
-        <div className="flex justify-between items-center bg-white p-10 rounded-[40px] shadow-sm border border-[#ecf0f1]">
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="flex justify-between items-center bg-white p-8 rounded-[32px] shadow-sm border border-[#ecf0f1]">
           <div>
-            <h1 className="text-3xl font-bold text-[#2c3e50] tracking-tighter uppercase">Payment Methods</h1>
-            <p className="text-[#95a5a6] font-semibold text-xs tracking-wider mt-1 uppercase opacity-80">Manage banks and applicable tax rates</p>
+            <h1 className="text-2xl font-black text-[#003354] tracking-tight uppercase">Payment Methods</h1>
+            <p className="text-[#95a5a6] font-bold text-[10px] tracking-widest mt-1 uppercase opacity-80">Manage banks and tax rates</p>
           </div>
           <button 
-  onClick={() => setShowAddModal(true)} 
-  className="bg-[#3498db] text-white px-10 py-5 rounded-[24px] font-bold flex items-center gap-3 shadow-xl shadow-[#3498db]/20 !normal-case text-xs transition-all hover:bg-[#2980b9] active:scale-95"
->
-  <Plus size={20} /> Add New Bank
-</button>
+            onClick={() => setShowAddModal(true)} 
+            className="bg-[#003354] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-lg shadow-slate-200 uppercase tracking-widest text-[10px] transition-all hover:opacity-90 active:scale-95"
+          >
+            <Plus size={18} /> Add New Bank
+          </button>
         </div>
 
-        {/* Bank Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Bank Cards Grid - Updated to 4 columns for smaller cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {banks.map((bank) => (
-            <div key={bank.id} className="bg-white p-10 rounded-[45px] relative group border border-[#ecf0f1] shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
-              <div className="flex justify-between items-start mb-8">
-                <div className="p-5 bg-[#3498db]/10 rounded-[25px] text-[#3498db] group-hover:bg-[#3498db] group-hover:text-white transition-all duration-500 shadow-inner">
-                  <Landmark size={28} />
+            <div key={bank.id} className="bg-white p-6 rounded-[32px] relative group border border-[#ecf0f1] shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1 overflow-hidden">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-slate-50 rounded-[18px] text-[#003354] group-hover:bg-[#003354] group-hover:text-white transition-all duration-500 shadow-inner border border-slate-100">
+                  <Landmark size={22} />
                 </div>
                 <button 
                   onClick={async () => { if(window.confirm("Delete this bank?")) { await api.delete(`/Bank/${bank.id}`); fetchBanks(); } }} 
-                  className="p-2 text-[#ecf0f1] hover:text-[#e74c3c] hover:bg-[#e74c3c]/10 rounded-full transition-all"
+                  className="p-1.5 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
                 >
-                  <Trash2 size={20} />
+                  <Trash2 size={18} />
                 </button>
               </div>
 
-              <h3 className="text-2xl font-bold text-[#2c3e50] uppercase mb-8 tracking-tight">{bank.bankName}</h3>
+              <h3 className="text-lg font-black text-[#2c3e50] uppercase mb-4 tracking-tight truncate" title={bank.bankName}>
+                {bank.bankName}
+              </h3>
               
-              <div className="space-y-2 p-6 bg-[#f5f7fa]/50 rounded-[30px] border border-[#ecf0f1]/50">
+              <div className="p-4 bg-[#f5f7fa]/50 rounded-[22px] border border-[#ecf0f1]/50">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-[#95a5a6] uppercase tracking-widest">Tax Percentage</span>
+                  <span className="text-[9px] font-black text-[#95a5a6] uppercase tracking-widest">Tax Rate</span>
                   {editingTaxId === bank.id ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <input 
                         type="number" 
-                        className="w-20 bg-white border-2 border-[#3498db] rounded-xl p-2 text-sm font-bold text-center outline-none" 
+                        className="w-14 bg-white border border-[#003354] rounded-lg p-1 text-xs font-bold text-center outline-none" 
                         value={tempTax} 
                         onChange={(e) => setTempTax(e.target.value)} 
                       />
-                      <button onClick={() => handleUpdateTax(bank.id)} className="p-2 bg-[#27ae60] text-white rounded-lg hover:bg-[#229954] transition-all shadow-lg">
-                        <Save size={18}/>
+                      <button onClick={() => handleUpdateTax(bank.id)} className="p-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all">
+                        <Save size={14}/>
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl font-bold text-[#2c3e50]">{bank.taxPercentage}%</span>
-                      <button onClick={() => { setEditingTaxId(bank.id); setTempTax(bank.taxPercentage); }} className="p-2 text-[#ecf0f1] hover:text-[#3498db] hover:bg-white rounded-lg transition-all">
-                        <Settings2 size={18} />
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl font-black text-[#003354]">{bank.taxPercentage}%</span>
+                      <button onClick={() => { setEditingTaxId(bank.id); setTempTax(bank.taxPercentage); }} className="p-1.5 text-slate-400 hover:text-[#003354] hover:bg-white rounded-md transition-all">
+                        <Settings2 size={16} />
                       </button>
                     </div>
                   )}
                 </div>
               </div>
               
-              <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-br from-[#3498db]/10 to-transparent rounded-full -mr-10 -mb-10 opacity-50 pointer-events-none"></div>
+              <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-100 to-transparent rounded-full -mr-6 -mb-6 opacity-40 pointer-events-none"></div>
             </div>
           ))}
         </div>
 
         {/* Add Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-[#2c3e50]/60 backdrop-blur-md flex items-center justify-center z-50 p-6 animate-in fade-in duration-300">
-            <div className="bg-white rounded-[50px] overflow-hidden w-full max-w-xl shadow-2xl">
-              <div className="p-10 bg-[#2c3e50] text-white flex justify-between items-center">
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-6">
+            <div className="bg-white rounded-[40px] overflow-hidden w-full max-w-lg shadow-2xl">
+              <div className="p-8 bg-[#003354] text-white flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-bold uppercase tracking-widest">New Method</h3>
-                  <p className="text-[#95a5a6] text-xs font-semibold mt-1 uppercase">Enter bank account details</p>
+                  <h3 className="text-lg font-black uppercase tracking-widest">New Method</h3>
+                  <p className="text-slate-400 text-[10px] font-bold mt-1 uppercase">Enter bank account details</p>
                 </div>
-                <button onClick={() => setShowAddModal(false)} className="p-3 hover:bg-[#34495e] rounded-2xl transition-all"><X size={28} /></button>
+                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all"><X size={24} /></button>
               </div>
-              <form onSubmit={handleAddBank} className="p-12 space-y-8">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-[#95a5a6] uppercase tracking-[0.2em] ml-2">Account/Bank Name</label>
+              <form onSubmit={handleAddBank} className="p-10 space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em] ml-2">Bank Name</label>
                   <input 
                     required 
-                    placeholder="e.g. HBL Main Account"
-                    className="w-full bg-[#f5f7fa] border-2 border-[#ecf0f1] rounded-[25px] p-6 font-semibold outline-none focus:border-[#3498db] focus:bg-white transition-all" 
+                    placeholder="e.g. HBL Account"
+                    className="w-full bg-[#f5f7fa] border-2 border-[#ecf0f1] rounded-2xl p-5 font-bold outline-none focus:border-[#003354] focus:bg-white transition-all text-sm" 
                     onChange={(e) => setNewBank({...newBank, bankName: e.target.value})} 
                   />
                 </div>
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-[#95a5a6] uppercase tracking-[0.2em] ml-2">Tax Rate (%)</label>
-                    <input 
-                      type="number" 
-                      placeholder="0.00"
-                      className="w-full bg-[#f5f7fa] border-2 border-[#ecf0f1] rounded-[25px] p-6 font-semibold outline-none focus:border-[#3498db] focus:bg-white transition-all" 
-                      onChange={(e) => setNewBank({...newBank, taxPercentage: e.target.value})} 
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em] ml-2">Tax Rate (%)</label>
+                  <input 
+                    type="number" 
+                    placeholder="0.00"
+                    className="w-full bg-[#f5f7fa] border-2 border-[#ecf0f1] rounded-2xl p-5 font-bold outline-none focus:border-[#003354] focus:bg-white transition-all text-sm" 
+                    onChange={(e) => setNewBank({...newBank, taxPercentage: e.target.value})} 
+                  />
                 </div>
-                <button type="submit" className="w-full bg-[#3498db] text-white py-7 rounded-[30px] font-bold uppercase tracking-widest text-sm hover:bg-[#2980b9] transition-all shadow-xl active:scale-[0.98]">
+                <button type="submit" className="w-full bg-[#003354] text-white py-5 rounded-[24px] font-black uppercase tracking-widest text-xs hover:opacity-95 transition-all shadow-xl active:scale-95">
                   Confirm & Save Method
                 </button>
               </form>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import Layout from '../components/Layout';
 import toast from 'react-hot-toast';
+import { FileDown } from 'lucide-react';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -174,12 +175,17 @@ const Orders = () => {
         <div className="flex justify-between items-center mb-10">
           <h2 className="text-3xl font-black text-[#003354] uppercase tracking-tight">Orders Management</h2>
           <div className="flex gap-4">
-            <button 
-                onClick={downloadAllOrdersCSV}
-                className="bg-white text-[#003354] px-6 py-3 rounded-2xl font-bold border border-[#003354]/10 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
-            >
-                <span className="text-xl">📊</span> Download Reports
-            </button>
+           <button 
+    onClick={downloadAllOrdersCSV}
+    className="bg-white text-[#003354] px-6 py-3 rounded-2xl font-bold border border-[#003354]/10 hover:bg-slate-50 hover:border-[#003354]/30 transition-all flex items-center gap-3 shadow-sm group active:scale-95"
+>
+    {/* Professional Download Icon */}
+    <FileDown size={20} strokeWidth={2.5} className="group-hover:translate-y-0.5 transition-transform" />
+    
+    <span className="uppercase text-[11px] tracking-widest font-black">
+        Download Reports
+    </span>
+</button>
             <button onClick={() => setShowModal(true)} className="bg-[#003354] text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:opacity-90 transition-all uppercase tracking-widest text-sm">
                 + New Order
             </button>
