@@ -128,9 +128,9 @@ const UserManagement = () => {
         <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
           <table className="w-full text-left border-collapse">
             {/* Table Header - Sky Blue Background and Bold Black Text */}
-            <thead className="bg-[#3da9f5]">
-    <tr className="text-[11px] font-[950] uppercase text-black tracking-widest border-b border-black/5">
-        <th className="p-6 font-black">User Info</th>
+           <thead className="erp-table-header">
+    <tr className="text-[11px] font-[950] uppercase text-white tracking-[0.2em] border-b border-white/10">
+        <th className="p-6 font-black text-left">User Info</th>
         <th className="p-6 text-center font-black">Designation / Role</th>
         <th className="p-6 text-center font-black">Status</th>
         <th className="p-6 text-right font-black">Actions</th>

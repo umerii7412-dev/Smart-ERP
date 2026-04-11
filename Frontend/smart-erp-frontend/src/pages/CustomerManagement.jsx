@@ -138,13 +138,13 @@ const CustomerManagement = () => {
 
         <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden overflow-x-auto">
           <table className="w-full text-left">
-           {/* UPDATED TABLE HEADER */}
-<thead className="bg-[#3da9f5]">
-  <tr className="text-[11px] font-black uppercase text-black tracking-widest">
-    <th className="p-6 font-black">Customer Info</th>
-    <th className="p-6 font-black">Contact Details</th>
-    <th className="p-6 font-black">Balance</th>
-    <th className="p-6 text-center font-black">Actions</th>
+            {/* UPDATED TABLE HEADER */}
+           <thead className="erp-table-header">
+  <tr className="text-[11px] font-black uppercase text-white tracking-[0.2em]">
+    <th className="p-6 font-black border-b border-white/10 text-left">Customer Info</th>
+    <th className="p-6 font-black border-b border-white/10 text-left">Contact Details</th>
+    <th className="p-6 font-black border-b border-white/10 text-left">Balance</th>
+    <th className="p-6 text-center font-black border-b border-white/10">Actions</th>
   </tr>
 </thead>
             <tbody className="divide-y divide-[#ecf0f1]">

@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+@theme {
+  /* Variable define karte waqt prefix 'color' lazmi hai */
+  --color-erp-main: #003354;
+}
+
+@layer utilities {
+  /* Ek manually class bana dete hain safety ke liye */
+  .erp-table-header {
+    background-color: #003354 !important;
+    color: white !important;
+  }
+}

@@ -144,14 +144,14 @@ const Inventory = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
              {/* UPDATED TABLE HEADER */}
-<thead className="bg-[#3da9f5]">
-  <tr className="text-[11px] font-black uppercase text-black tracking-widest">
-    <th className="p-6 font-black text-black">Product Name</th>
-    <th className="p-6 font-black text-black">Category</th>
-    <th className="p-6 font-black text-black">Price</th>
-    <th className="p-6 text-center font-black text-black">Quantity</th>
-    <th className="p-6 text-center font-black text-black">Status</th>
-    <th className="p-6 text-right pr-10 font-black text-black">Actions</th>
+<thead className="erp-table-header">
+  <tr className="text-[11px] font-black uppercase text-white tracking-[0.2em] border-b border-white/10">
+    <th className="p-6 font-black text-left">Product Name</th>
+    <th className="p-6 font-black text-left">Category</th>
+    <th className="p-6 font-black text-left">Price</th>
+    <th className="p-6 text-center font-black">Quantity</th>
+    <th className="p-6 text-center font-black">Status</th>
+    <th className="p-6 text-right pr-10 font-black">Actions</th>
   </tr>
 </thead>
               <tbody className="divide-y divide-slate-100">

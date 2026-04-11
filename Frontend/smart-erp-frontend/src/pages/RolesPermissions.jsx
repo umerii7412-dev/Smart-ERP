@@ -92,24 +92,24 @@ const Roles = () => {
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-bold text-slate-800 uppercase tracking-tight">System Management</h1>
                     {/* Add Role Button */}
-                  <button 
-    onClick={() => setIsModalOpen(true)} 
-    className="bg-[#3da9f5] text-white px-8 py-2.5 rounded-xl font-bold normal-case text-[11px] tracking-widest shadow-lg shadow-blue-100 hover:bg-[#3498db] transition-all active:scale-95"
->
-    + Add Role
-</button>
+                    <button 
+                        onClick={() => setIsModalOpen(true)} 
+                        className="bg-[#3da9f5] text-white px-8 py-2.5 rounded-xl font-bold uppercase text-[11px] tracking-widest shadow-lg shadow-blue-100 hover:bg-[#3498db] transition-all active:scale-95"
+                    >
+                        + Add Role
+                    </button>
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <table className="min-w-full">
                         {/* Table Header - Matching Button Color exactly */}
-                        <thead className="bg-[#3da9f5]">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-[11px] font-[900] text-black uppercase tracking-[0.2em]">Role Name</th>
-                                <th className="px-6 py-4 text-center text-[11px] font-[900] text-black uppercase tracking-[0.2em]">Total Users</th>
-                                <th className="px-6 py-4 text-center text-[11px] font-[900] text-black uppercase tracking-[0.2em]">Actions</th>
-                            </tr>
-                        </thead>
+                        <thead className="erp-table-header">
+    <tr>
+        <th className="px-6 py-4 text-left text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Role Name</th>
+        <th className="px-6 py-4 text-center text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Total Users</th>
+        <th className="px-6 py-4 text-center text-[11px] font-[900] text-white uppercase tracking-[0.2em] border-b border-white/10">Actions</th>
+    </tr>
+</thead>
                         <tbody className="divide-y divide-slate-100">
                             {roles.map((role) => {
                                 const name = role.roleName || role.name;
