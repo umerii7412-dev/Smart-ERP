@@ -13,7 +13,6 @@ const Orders = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Initial state for resetting form
   const initialOrderState = {
     customerId: '',
     customerName: '',
@@ -59,7 +58,6 @@ const Orders = () => {
         text: 'Failed to load data',
         icon: 'error',
         timer: 3000,
-        timerProgressBar: true,
         showConfirmButton: false
       });
     }
@@ -91,14 +89,7 @@ const Orders = () => {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (!newOrder.customerId || !newOrder.bankId || newOrder.items.length === 0) {
-      return Swal.fire({
-        title: 'Field Required',
-        text: 'Please complete the order details',
-        icon: 'info',
-        timer: 3000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      });
+      return Swal.fire({ title: 'Field Required', text: 'Please complete details', icon: 'info' });
     }
 
     try {
@@ -117,26 +108,12 @@ const Orders = () => {
       };
 
       await api.post('/Order/place-order', payload);
-      Swal.fire({
-        title: 'Success',
-        text: 'Order saved successfully!',
-        icon: 'success',
-        timer: 3000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      });
+      Swal.fire({ title: 'Success', text: 'Order saved!', icon: 'success', timer: 2000 });
       setShowModal(false);
-      setNewOrder(initialOrderState); // Reset form after success
+      setNewOrder(initialOrderState);
       fetchOrders();
     } catch (err) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Could not save order',
-        icon: 'error',
-        timer: 3000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      });
+      Swal.fire({ title: 'Error', text: 'Could not save order', icon: 'error' });
     }
   };
 
@@ -146,10 +123,7 @@ const Orders = () => {
         <div className="flex justify-between items-center mb-10">
           <h2 className="text-3xl font-bold text-[#003354]">Orders</h2>
           <button 
-            onClick={() => {
-              setNewOrder(initialOrderState); // Clear form data when opening modal
-              setShowModal(true);
-            }} 
+            onClick={() => { setNewOrder(initialOrderState); setShowModal(true); }} 
             className="bg-[#003354] text-white px-8 py-3 rounded-2xl font-bold shadow-lg flex items-center gap-2"
           >
             <Plus size={18} /> New Order
@@ -168,12 +142,12 @@ const Orders = () => {
             </thead>
             <tbody>
               {orders.map(order => (
-                <tr key={order.id} className="border-b hover:bg-slate-50">
+                <tr key={order.id} className="border-b hover:bg-slate-50 transition-colors">
                   <td className="p-5 font-bold">#ORD-{order.id}</td>
                   <td className="p-5">{order.customerName}</td>
                   <td className="p-5 font-bold text-lg">{parseFloat(order.totalAmount).toLocaleString()}</td>
                   <td className="p-5 text-center">
-                    <button onClick={() => { setSelectedOrder(order); setShowDetailsModal(true); }} className="bg-[#003354]/10 text-[#003354] px-5 py-2 rounded-xl text-xs font-bold transition-all hover:bg-[#003354] hover:text-white">
+                    <button onClick={() => { setSelectedOrder(order); setShowDetailsModal(true); }} className="bg-[#003354]/10 text-[#003354] px-5 py-2 rounded-xl text-xs font-bold hover:bg-[#003354] hover:text-white transition-all">
                       View Details
                     </button>
                   </td>
@@ -184,6 +158,7 @@ const Orders = () => {
         </div>
       </div>
 
+      {/* NEW ORDER MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-[#003354]/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden">
@@ -195,20 +170,16 @@ const Orders = () => {
             <form onSubmit={handlePlaceOrder} className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 ">Search Customer</label>
+                  <label className="text-[10px] font-bold text-slate-400">Search Customer</label>
                   <input 
                     list="customer-list"
-                    placeholder="Type name to search..."
+                    placeholder="Type name..."
                     className="w-full border-2 border-[#ecf0f1] rounded-xl p-3 text-sm focus:border-[#003354] outline-none"
                     value={newOrder.customerName}
                     onChange={(e) => {
                       const val = e.target.value;
                       const selected = customers.find(c => c.name === val);
-                      if (selected) {
-                        setNewOrder({...newOrder, customerId: selected.id, customerName: selected.name});
-                      } else {
-                        setNewOrder({...newOrder, customerName: val, customerId: ''});
-                      }
+                      setNewOrder({...newOrder, customerName: val, customerId: selected ? selected.id : ''});
                     }}
                   />
                   <datalist id="customer-list">
@@ -217,7 +188,7 @@ const Orders = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 ">Payment Method</label>
+                  <label className="text-[10px] font-bold text-slate-400">Payment Method</label>
                   <select 
                     required 
                     className="w-full border-2 border-[#ecf0f1] rounded-xl p-3 text-sm focus:border-[#003354] outline-none"
@@ -238,7 +209,7 @@ const Orders = () => {
                   </button>
                 </div>
 
-                <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
                   {newOrder.items.map((item, index) => (
                     <div key={index} className="flex gap-3 items-center bg-slate-50 p-3 rounded-2xl border border-[#ecf0f1]">
                       <select 
@@ -252,9 +223,8 @@ const Orders = () => {
                         }}
                       >
                         <option value="">Select Product</option>
-                        {products.map(p => <option key={p.id} value={p.id}>{p.name} - {p.price}</option>)}
+                        {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
-
                       <input 
                         type="number" 
                         className="w-16 rounded-lg p-1 text-center border font-bold" 
@@ -265,7 +235,6 @@ const Orders = () => {
                           calculateTotal(updated, newOrder.bankId, newOrder.discountPercentage);
                         }}
                       />
-                      <span className="text-xs font-bold text-slate-500 w-20 text-right">{(item.unitPrice * item.quantity).toLocaleString()}</span>
                       <button type="button" onClick={() => {
                         const filtered = newOrder.items.filter((_, i) => i !== index);
                         calculateTotal(filtered, newOrder.bankId, newOrder.discountPercentage);
@@ -275,45 +244,41 @@ const Orders = () => {
                 </div>
               </div>
 
-              <div className="bg-[#003354] rounded-3xl p-6 text-white">
+              <div className="bg-[#003354] rounded-3xl p-6 text-white shadow-lg">
                 <div className="grid grid-cols-2 gap-4 border-b border-white/10 mb-4 pb-4">
-                  <div className="space-y-2">
+                   <div className="space-y-2">
                     <label className="text-[10px] font-bold opacity-70">Discount (%)</label>
-                    <input 
-                      type="number" 
-                      className="w-full bg-white/10 rounded-lg p-2 text-white font-bold outline-none border border-white/20" 
-                      value={newOrder.discountPercentage}
-                      onChange={(e) => calculateTotal(newOrder.items, newOrder.bankId, e.target.value)}
-                    />
+                    <input type="number" className="w-full bg-white/10 rounded-lg p-2 text-white font-bold outline-none border border-white/20" value={newOrder.discountPercentage} onChange={(e) => calculateTotal(newOrder.items, newOrder.bankId, e.target.value)} />
                   </div>
                   <div className="text-right space-y-1">
                     <div className="flex justify-between text-[11px] opacity-80">
-                      <span>Discount ({newOrder.discountPercentage}%):</span>
-                      <span>- {newOrder.discountAmount}</span>
+                      <span>Tax ({newOrder.taxPercentage}%):</span>
+                      <span>+ {parseFloat(newOrder.taxAmount).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-[11px] opacity-80">
-                      <span>Tax ({newOrder.taxPercentage}%):</span>
-                      <span>+ {newOrder.taxAmount}</span>
+                      <span>Discount ({newOrder.discountPercentage}%):</span>
+                      <span>- {parseFloat(newOrder.discountAmount).toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="text-sm font-bold opacity-70 tracking-wide">Total Payable</p>
+                  <p className="text-sm font-bold opacity-70">Total Payable</p>
                   <p className="text-4xl font-bold">{parseFloat(newOrder.totalAmount).toLocaleString()}</p>
                 </div>
-                <button type="submit" className="w-full bg-white text-[#003354] mt-6 p-4 rounded-2xl font-bold shadow-xl">Confirm & Save Order</button>
+                <button type="submit" className="w-full bg-white text-[#003354] mt-6 p-4 rounded-2xl font-bold">Confirm Order</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* VIEW DETAILS MODAL (INVOICE) */}
       {showDetailsModal && selectedOrder && (
         <div className="fixed inset-0 bg-[#003354]/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
             <div className="p-6 bg-[#003354] text-white flex justify-between items-center">
-              <h3 className="font-bold">Order Invoice</h3>
-              <button onClick={() => setShowDetailsModal(false)}><X size={18}/></button>
+              <h3 className="font-bold tracking-tight">Order Invoice</h3>
+              <button onClick={() => setShowDetailsModal(false)} className="hover:rotate-90 transition-transform"><X size={18}/></button>
             </div>
             <div className="p-8 space-y-6">
               <div className="flex justify-between items-end border-b pb-4">
@@ -322,34 +287,34 @@ const Orders = () => {
               </div>
               
               <div className="space-y-2">
-                <span className="text-xs font-bold text-slate-400 uppercase">Items</span>
-                <div className="bg-slate-50 rounded-2xl p-4 space-y-3 border">
+                <span className="text-xs font-bold text-slate-400 uppercase">Items Ordered</span>
+                <div className="bg-slate-50 rounded-2xl p-4 space-y-3 border border-[#ecf0f1] max-h-48 overflow-y-auto">
                   {(selectedOrder.orderItems || []).map((item, i) => (
-                    <div key={i} className="flex justify-between text-xs font-medium">
-                      <span className="text-slate-600">{item.productName} (x{item.qtySold})</span>
-                      <span className="font-bold">{item.priceAtSale * item.qtySold}</span>
+                    <div key={i} className="flex justify-between text-xs font-medium border-b border-slate-100 last:border-0 pb-2 last:pb-0">
+                      <span className="text-slate-600">{item.productName} <span className="text-[10px] font-bold">x{item.qtySold}</span></span>
+                      <span className="font-bold text-[#003354]">{(item.priceAtSale * item.qtySold).toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-4 space-y-3 border-t border-dashed border-slate-300">
-                <div className="flex justify-between text-xs font-bold text-red-500">
+              <div className="pt-4 space-y-2 border-t border-dashed border-slate-300">
+                <div className="flex justify-between text-[11px] font-bold text-red-500">
                   <span>Discount ({((selectedOrder.discount / (selectedOrder.subtotal || 1)) * 100).toFixed(0)}%) (-)</span>
                   <span>{selectedOrder.discount?.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-xs font-bold text-slate-500">
-                  <span>Sales Tax ({((selectedOrder.taxAmount / (selectedOrder.totalAmount - selectedOrder.taxAmount || 1)) * 100).toFixed(0)}%) (+)</span>
+                <div className="flex justify-between text-[11px] font-bold text-slate-500">
+                  <span>Tax ({((selectedOrder.taxAmount / (selectedOrder.totalAmount - selectedOrder.taxAmount || 1)) * 100).toFixed(0)}%) (+)</span>
                   <span>{selectedOrder.taxAmount?.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center pt-4 border-t-2 mt-2">
-                  <span className="text-sm font-bold text-slate-400 uppercase">Grand Total</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase">Grand Total</span>
                   <span className="text-3xl font-bold text-[#003354]">
                     {parseFloat(selectedOrder.totalAmount).toLocaleString()}
                   </span>
                 </div>
               </div>
-              <button onClick={() => setShowDetailsModal(false)} className="w-full bg-[#003354] text-white py-4 rounded-2xl font-bold">Close Invoice</button>
+              <button onClick={() => setShowDetailsModal(false)} className="w-full bg-[#003354] text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-transform">Close Invoice</button>
             </div>
           </div>
         </div>
