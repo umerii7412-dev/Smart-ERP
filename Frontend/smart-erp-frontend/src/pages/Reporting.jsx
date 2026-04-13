@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
 import Layout from '../components/Layout';
-import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { Download, RefreshCw } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
@@ -42,7 +42,14 @@ const Reporting = () => {
       if (prodRes.status === 'fulfilled') setProducts(prodRes.value.data || []);
 
     } catch (err) {
-      toast.error("Data fetch karne mein masla hua");
+      Swal.fire({
+        title: 'Error',
+        text: "Data fetch karne mein masla hua",
+        icon: 'error',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
     } finally {
       setLoading(false);
     }
@@ -87,7 +94,15 @@ const Reporting = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success(`${activeTab} report downloaded!`);
+
+    Swal.fire({
+      title: 'Success',
+      text: `${activeTab} report downloaded!`,
+      icon: 'success',
+      timer: 3000,
+      timerProgressBar: true,
+      showConfirmButton: false
+    });
   };
 
   const totalSalesAmount = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
@@ -96,7 +111,7 @@ const Reporting = () => {
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="animate-spin w-12 h-12 border-4 border-[#003354] border-t-transparent rounded-full mb-4"></div>
-        <p className="font-bold text-[#003354] uppercase tracking-widest">Loading Reports...</p>
+        <p className="font-bold text-[#003354]">Loading Reports...</p>
       </div>
     </Layout>
   );
@@ -104,34 +119,32 @@ const Reporting = () => {
   return (
     <Layout>
       <div className="space-y-6 pb-10">
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl shadow-sm border border-[#ecf0f1] gap-4">
           <div>
-            <h2 className="text-3xl font-black text-[#003354] uppercase tracking-tight">Enterprise Reporting</h2>
+            <h2 className="text-3xl font-bold text-[#003354] tracking-tight">Enterprise Reporting</h2>
             <p className="text-slate-400 font-medium tracking-tight">Real-time business insights & system analytics</p>
           </div>
           <div className="flex gap-2">
-           {/* Export CSV Button */}
-<button 
-  onClick={handleDownloadCSV} 
-  className="bg-white text-slate-700 border border-slate-200 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2 active:scale-95 group"
->
-  <Download size={18} strokeWidth={2.5} className="text-slate-500 group-hover:text-slate-800 transition-colors" />
-  <span className="uppercase text-[11px] tracking-widest font-black">Export CSV</span>
-</button>
+            <button 
+              onClick={handleDownloadCSV} 
+              className="bg-white text-slate-700 border border-slate-200 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2 active:scale-95 group"
+            >
+              <Download size={18} strokeWidth={2.5} className="text-slate-500 group-hover:text-slate-800 transition-colors" />
+              <span className="text-[12px] font-bold">Export CSV</span>
+            </button>
 
-{/* Refresh Data Button */}
-<button 
-  onClick={fetchAllReports} 
-  className="bg-[#003354] text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-95 transition-all shadow-lg shadow-[#003354]/20 flex items-center gap-2 active:scale-95 group"
->
-  <RefreshCw size={18} strokeWidth={2.5} className="group-hover:rotate-180 transition-transform duration-500" />
-  <span className="uppercase text-[11px] tracking-widest font-black">Refresh Data</span>
-</button>
+            <button 
+              onClick={fetchAllReports} 
+              className="bg-[#003354] text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-95 transition-all shadow-lg shadow-[#003354]/20 flex items-center gap-2 active:scale-95 group"
+            >
+              <RefreshCw size={18} strokeWidth={2.5} className="group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-[12px] font-bold">Refresh Data</span>
+            </button>
           </div>
         </div>
 
-        {/* Tabs Section */}
+        {/* Tabs */}
         <div className="flex flex-wrap gap-2 border-b border-[#ecf0f1]">
           {['overview', 'banks', 'customers', 'inventory', 'orders'].map((tab) => (
             <button
@@ -153,10 +166,10 @@ const Reporting = () => {
                 <StatCard title="Total Products" value={inventorySummary?.totalProducts || products.length} color="blue" onClick={() => setActiveTab('inventory')} />
                 <StatCard title="Active Customers" value={customers.length} color="green" onClick={() => setActiveTab('customers')} />
                 <StatCard title="Total Orders" value={orders.length} color="purple" onClick={() => setActiveTab('orders')} />
-                <StatCard title="Total Sales" value={`Rs. ${totalSalesAmount.toLocaleString()}`} color="red" onClick={() => setActiveTab('banks')} />
+                <StatCard title="Total Sales" value={totalSalesAmount.toLocaleString()} color="red" onClick={() => setActiveTab('banks')} />
               </div>
               <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                <h3 className="font-black text-[#003354] mb-6 uppercase tracking-wider text-sm">Stock Analytics</h3>
+                <h3 className="font-bold text-[#003354] mb-6 text-sm">Stock Analytics</h3>
                 <div style={{ width: '100%', height: '350px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={[
@@ -165,8 +178,8 @@ const Reporting = () => {
                       { name: 'Out of Stock', val: inventorySummary?.outOfStockItems || 0 }
                     ]}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                      <YAxis axisLine={false} tickLine={false} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} style={{ fontSize: '12px', fontWeight: '600' }} />
+                      <YAxis axisLine={false} tickLine={false} style={{ fontSize: '12px', fontWeight: '600' }} />
                       <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
                       <Bar dataKey="val" fill="#003354" radius={[10, 10, 0, 0]} barSize={60} />
                     </BarChart>
@@ -179,34 +192,34 @@ const Reporting = () => {
           {activeTab === 'banks' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4 duration-500">
               <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                <h3 className="text-xl font-black mb-8 text-[#003354] uppercase">Revenue Distribution</h3>
+                <h3 className="text-xl font-bold mb-8 text-[#003354]">Revenue Distribution</h3>
                 <div style={{ width: '100%', height: '300px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={paymentData} nameKey="bankName" dataKey="totalReceived" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={8}>
                         {paymentData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="none" />)}
                       </Pie>
-                      <Tooltip contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} formatter={(value) => `Rs. ${value.toLocaleString()}`} />
+                      <Tooltip contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} formatter={(value) => value.toLocaleString()} />
                       <Legend verticalAlign="bottom" iconType="circle" />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               </div>
               <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                <h3 className="text-xl font-black text-[#003354] uppercase mb-6">Bank Ledger</h3>
+                <h3 className="text-xl font-bold text-[#003354] mb-6">Bank Ledger</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
-                    <thead className="erp-table-header">
-                      <tr className="text-white text-[10px] uppercase font-black tracking-[0.2em]">
+                    <thead className="bg-[#003354] text-white">
+                      <tr className="text-[12px] font-bold">
                         <th className="p-4 rounded-l-xl">Institution</th>
                         <th className="p-4 text-right rounded-r-xl">Total Collection</th>
                       </tr>
                     </thead>
                     <tbody>
                       {paymentData.length > 0 ? paymentData.map((bank, i) => (
-                        <tr key={i} className="group hover:bg-slate-50 transition-all rounded-xl border-b border-slate-100">
-                          <td className="py-4 pl-4 font-black text-slate-700 uppercase">{bank.bankName || "Unknown Bank"}</td>
-                          <td className="py-4 text-right pr-4 text-green-600 font-black">Rs. {bank.totalReceived?.toLocaleString() || 0}</td>
+                        <tr key={i} className="group hover:bg-slate-50 transition-all border-b border-slate-100">
+                          <td className="py-4 pl-4 font-bold text-slate-700">{bank.bankName || "Unknown Bank"}</td>
+                          <td className="py-4 text-right pr-4 text-green-600 font-black text-lg">{bank.totalReceived?.toLocaleString() || 0}</td>
                         </tr>
                       )) : <NoDataFound />}
                     </tbody>
@@ -219,26 +232,25 @@ const Reporting = () => {
           {activeTab === 'customers' && (
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-in fade-in duration-500">
               <table className="w-full text-left">
-                <thead className="erp-table-header">
-                  <tr className="text-white text-[10px] uppercase tracking-[0.2em]">
-                    <th className="p-5 font-black">Customer Profile</th>
-                    <th className="p-5 font-black">Contact Details</th>
-                    <th className="p-5 text-right font-black">Outstanding Balance</th>
+                <thead className="bg-[#003354] text-white">
+                  <tr className="text-[12px] font-bold">
+                    <th className="p-5">Customer Profile</th>
+                    <th className="p-5">Contact Details</th>
+                    <th className="p-5 text-right">Outstanding Balance</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {customers.length > 0 ? customers.map((c, i) => (
                     <tr key={i} className="hover:bg-slate-50/80 transition-all">
                       <td className="p-5">
-                        <div className="font-black text-[#003354] text-lg">{c.name}</div>
-                        <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{c.customerType || 'Retail'}</div>
+                        <div className="font-bold text-[#003354] text-lg">{c.name}</div>
+                        <div className="text-[11px] text-slate-400 font-bold">{c.customerType || 'Retail'}</div>
                       </td>
                       <td className="p-5">
                         <div className="text-slate-600 font-medium">{c.email}</div>
                         <div className="text-slate-400 text-sm font-bold">{c.phone}</div>
                       </td>
-                      <td className="p-5 text-right font-black text-2xl text-slate-900">
-                        <span className="text-sm font-bold text-slate-400 mr-2">Rs.</span>
+                      <td className="p-5 text-right font-black text-lg text-slate-900">
                         {c.balance?.toLocaleString() || 0}
                       </td>
                     </tr>
@@ -251,12 +263,12 @@ const Reporting = () => {
           {activeTab === 'inventory' && (
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-in fade-in duration-500">
               <table className="w-full text-left">
-                <thead className="erp-table-header">
-                  <tr className="text-white text-[10px] uppercase tracking-[0.2em]">
-                    <th className="p-5 font-black">Product Info</th>
-                    <th className="p-5 font-black">Category</th>
-                    <th className="p-5 text-center font-black">Stock Level</th>
-                    <th className="p-5 text-right font-black">Unit Price</th>
+                <thead className="bg-[#003354] text-white">
+                  <tr className="text-[12px] font-bold">
+                    <th className="p-5">Product Info</th>
+                    <th className="p-5">Category</th>
+                    <th className="p-5 text-center">Stock Level</th>
+                    <th className="p-5 text-right">Unit Price</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
@@ -264,14 +276,14 @@ const Reporting = () => {
                     <tr key={i} className="hover:bg-slate-50 transition-all">
                       <td className="p-5 font-bold text-slate-800">{typeof p.name === 'object' ? p.name.name : p.name}</td>
                       <td className="p-5">
-                        <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">{typeof p.category === 'object' ? p.category.name : (p.category || "General")}</span>
+                        <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-[11px] font-bold">{typeof p.category === 'object' ? p.category.name : (p.category || "General")}</span>
                       </td>
                       <td className="p-5 text-center">
-                        <div className={`inline-flex items-center px-4 py-1.5 rounded-xl font-black text-[10px] border ${p.stockQuantity < 10 ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
-                          {p.stockQuantity} UNITS
+                        <div className={`inline-flex items-center px-4 py-1.5 rounded-xl font-bold text-[11px] border ${p.stockQuantity < 10 ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                          {p.stockQuantity} Units
                         </div>
                       </td>
-                      <td className="p-5 text-right font-black text-slate-900 uppercase">Rs. {p.price?.toLocaleString()}</td>
+                      <td className="p-5 text-right font-black text-lg text-slate-900">{p.price?.toLocaleString()}</td>
                     </tr>
                   )) : <NoDataFound />}
                 </tbody>
@@ -282,21 +294,21 @@ const Reporting = () => {
           {activeTab === 'orders' && (
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-in fade-in duration-500">
               <table className="w-full text-left">
-                <thead className="erp-table-header">
-                  <tr className="text-white text-[10px] uppercase tracking-[0.2em]">
-                    <th className="p-5 font-black">Order ID</th>
-                    <th className="p-5 font-black">Customer</th>
-                    <th className="p-5 font-black">Date</th>
-                    <th className="p-5 text-right font-black">Total Bill</th>
+                <thead className="bg-[#003354] text-white">
+                  <tr className="text-[12px] font-bold">
+                    <th className="p-5">Order ID</th>
+                    <th className="p-5">Customer</th>
+                    <th className="p-5">Date</th>
+                    <th className="p-5 text-right">Total Bill</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
                   {orders.length > 0 ? orders.map((o, i) => (
                     <tr key={i} className="hover:bg-slate-50 transition-all">
-                      <td className="p-5 font-black text-[#003354]">#ORD-{o.id}</td>
+                      <td className="p-5 font-bold text-[#003354]">#ORD-{o.id}</td>
                       <td className="p-5 font-bold text-slate-700">{o.customerName || "Walk-in"}</td>
                       <td className="p-5 text-slate-400 font-bold">{new Date(o.orderDate).toLocaleDateString()}</td>
-                      <td className="p-5 text-right font-black text-lg text-slate-900">Rs. {o.totalAmount?.toLocaleString()}</td>
+                      <td className="p-5 text-right font-black text-lg text-slate-900">{o.totalAmount?.toLocaleString()}</td>
                     </tr>
                   )) : <NoDataFound />}
                 </tbody>
@@ -319,10 +331,11 @@ const StatCard = ({ title, value, color, onClick }) => {
   return (
     <div onClick={onClick} className={`bg-white p-6 rounded-3xl shadow-sm border border-slate-100 border-t-8 cursor-pointer transform transition-all hover:-translate-y-2 active:scale-95 group ${themes[color]}`}>
       <div className="flex justify-between items-start mb-4">
-        <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">{title}</p>
+        <p className="text-slate-400 font-bold text-[11px]">{title}</p>
         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-300">→</span>
       </div>
-      <h4 className="text-2xl font-black text-[#003354] break-words">{value || 0}</h4>
+      {/* Updated uniform size for StatCard values */}
+      <h4 className="text-lg font-black text-[#003354] break-words">{value || 0}</h4>
       <div className="mt-4 w-10 h-1 bg-slate-100 rounded-full group-hover:w-full transition-all duration-500"></div>
     </div>
   );
@@ -332,7 +345,7 @@ const NoDataFound = () => (
   <tr>
     <td colSpan="100%" className="p-20 text-center">
       <div className="text-slate-200 text-5xl mb-4">📂</div>
-      <p className="text-slate-400 font-black uppercase text-xs tracking-widest">No Records Found</p>
+      <p className="text-slate-400 font-bold text-xs">No records found</p>
     </td>
   </tr>
 );

@@ -1,147 +1,117 @@
 import React, { useState } from 'react';
-
 import api from '../api';
-
 import { useNavigate } from 'react-router-dom';
-
-import toast from 'react-hot-toast';
-
-
+import Swal from 'sweetalert2';
 
 const Login = () => {
-
   const [email, setEmail] = useState('');
-
   const [password, setPassword] = useState('');
-
   const navigate = useNavigate();
 
-
+  const bgImage = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop";
 
   const handleLogin = async (e) => {
-
     e.preventDefault();
-
     try {
-
       const response = await api.post('/Auth/login', { email, password });
-
-     
-
-      // Token, Role aur Name save karein taake layout mein use ho sakain
-
+      
       localStorage.setItem('token', response.data.token);
-
       localStorage.setItem('role', response.data.role);
-
       localStorage.setItem('userName', response.data.userName);
-
-     
-
-      toast.success('Login Successful!');
+      
+      Swal.fire({
+        title: 'Login Successful!',
+        text: `Welcome back, ${response.data.userName}`,
+        icon: 'success',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
 
       navigate('/dashboard');
-
     } catch (error) {
-
-      // Backend se jo "Account Blocked" ka message aayega wo yahan show hoga
-
-      toast.error(error.response?.data || 'Login Fail ho gaya!');
-
+      Swal.fire({
+        title: 'Login Failed!',
+        text: error.response?.data || 'Invalid credentials, please try again.',
+        icon: 'error',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
     }
-
   };
 
-
-
   return (
+    /* fixed inset-0 aur bg-cover pory view-port ko cover kar leta hai */
+    <div 
+      className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat font-sans"
+      style={{ 
+        backgroundImage: `url('${bgImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Dark Overlay - isko bhi inset-0 rakha hai taaki white gaps na bachein */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[3px]"></div>
 
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
-
-        <div className="text-center mb-8">
-
-          <h1 className="text-3xl font-bold text-blue-900">Smart ERP</h1>
-
-          <p className="text-slate-500 mt-2">Login your Account</p>
-
+      {/* Login Card */}
+      <div className="bg-white/10 backdrop-blur-2xl p-10 rounded-[40px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] w-full max-w-md border border-white/20 relative z-10 mx-4 animate-in fade-in zoom-in duration-500">
+        
+        <div className="text-center mb-10">
+          <div className="inline-block p-4 bg-white/20 backdrop-blur-md rounded-2xl mb-4 border border-white/30 shadow-xl">
+            <h1 className="text-2xl font-black text-white tracking-tighter italic">S-ERP</h1>
+          </div>
+          <h2 className="text-3xl font-black text-white tracking-tight">Smart ERP System</h2>
+          <p className="text-white/60 mt-2 text-sm font-semibold tracking-wide">Enter your credentials to continue</p>
         </div>
 
-
-
         <form onSubmit={handleLogin} className="space-y-6">
-
-          <div>
-
-            <label className="block text-sm font-medium text-slate-700">Email Address</label>
-
+          <div className="group">
+            <label className="block text-[11px] font-black text-white/70 ml-2 mb-1 uppercase tracking-widest transition-colors group-focus-within:text-white">
+              Email
+            </label>
             <input
-
               type="email"
-
-              className="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition"
-
-              placeholder="admin@erp.com"
-
+              className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-2xl focus:bg-white/20 focus:border-white/50 outline-none transition-all font-bold text-white placeholder-white/30 shadow-inner"
+              placeholder="name@company.com"
               value={email}
-
               onChange={(e) => setEmail(e.target.value)}
-
               required
-
             />
-
           </div>
 
-
-
-          <div>
-
-            <label className="block text-sm font-medium text-slate-700">Password</label>
-
+          <div className="group">
+            <label className="block text-[11px] font-black text-white/70 ml-2 mb-1 uppercase tracking-widest transition-colors group-focus-within:text-white">
+              Password
+            </label>
             <input
-
               type="password"
-
-              className="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition"
-
+              className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-2xl focus:bg-white/20 focus:border-white/50 outline-none transition-all font-bold text-white placeholder-white/30 shadow-inner"
               placeholder="••••••••"
-
               value={password}
-
               onChange={(e) => setPassword(e.target.value)}
-
               required
-
             />
-
           </div>
 
-
-
-          <button
-
-            type="submit"
-
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition duration-300 shadow-lg shadow-blue-200"
-
-          >
-
-            Sign In
-
-          </button>
-
+          <div className="pt-4">
+            <button
+              type="submit"
+              className="w-full bg-white text-[#003354] py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-white/90 hover:-translate-y-1 transition-all active:scale-95"
+            >
+              Login
+            </button>
+          </div>
         </form>
 
+        <div className="mt-10 pt-6 border-t border-white/10 text-center">
+          <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.25em]">
+            Enterprise Grade Security 2026
+          </p>
+        </div>
       </div>
-
     </div>
-
   );
-
 };
-
-
 
 export default Login;

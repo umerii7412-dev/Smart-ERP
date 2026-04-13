@@ -9,7 +9,7 @@ import api from '../api';
 import Layout from '../components/Layout';
 import toast from 'react-hot-toast';
 
-const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = ['#003354', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -37,10 +37,8 @@ const Dashboard = () => {
         totalCategories: uniqueCats.length
       });
 
-      // Chart Data
       setChartData(data.slice(0, 10).map(item => ({ name: item.name, quantity: item.stockQuantity })));
       
-      // Category Pie Chart Data
       const catCounts = uniqueCats.map(catName => ({
         name: catName,
         value: data.filter(i => (i.category?.name || "Uncategorized") === catName).length
@@ -58,25 +56,28 @@ const Dashboard = () => {
     <Layout>
       <div className="p-8 bg-[#f5f7fa] min-h-screen space-y-8">
         
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-black text-[#2c3e50] tracking-tight uppercase flex items-center gap-2">
-  <LayoutDashboard className="text-[#3498db]" /> ERP Analytics Dashboard
-</h1>
-          <button onClick={fetchDashboardData} className="flex items-center gap-2 bg-white border border-[#ecf0f1] px-4 py-2 rounded-xl text-xs font-black hover:bg-[#f5f7fa] transition-all shadow-sm">
+        {/* Header - Updated: Removed uppercase, set color to Navy Blue */}
+        <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-[#ecf0f1]">
+          <h1 className="text-2xl font-black text-[#003354] tracking-tight flex items-center gap-2">
+            <LayoutDashboard className="text-[#003354]" /> ERP Analytics Dashboard
+          </h1>
+          <button 
+            onClick={fetchDashboardData} 
+            className="flex items-center gap-2 bg-white border border-[#ecf0f1] px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#f5f7fa] transition-all shadow-sm"
+          >
             <RefreshCcw size={14} className={loading ? "animate-spin" : ""} /> {loading ? "Syncing..." : "Refresh"}
           </button>
         </div>
 
-        {/* --- THREE STATS CARDS --- */}
+        {/* STATS CARDS - Updated: Removed uppercase from labels */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div onClick={() => navigate('/inventory')} className="cursor-pointer p-6 bg-white rounded-[24px] border border-[#ecf0f1] shadow-sm hover:border-[#3498db] transition-all group">
+          <div onClick={() => navigate('/inventory')} className="cursor-pointer p-6 bg-white rounded-[24px] border border-[#ecf0f1] shadow-sm hover:border-[#003354] transition-all group">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-black uppercase text-[#95a5a6]">Total Products</p>
-                <h2 className="text-3xl font-black text-[#2c3e50] mt-1">{stats.totalProducts}</h2>
+                <p className="text-[10px] font-black capitalize text-[#95a5a6] tracking-wider">Total Products</p>
+                <h2 className="text-3xl font-black text-[#003354] mt-1">{stats.totalProducts}</h2>
               </div>
-              <div className="p-3 rounded-2xl bg-[#3498db] bg-opacity-10 text-[#3498db] group-hover:bg-[#3498db] group-hover:text-white transition-colors">
+              <div className="p-3 rounded-2xl bg-[#003354]/5 text-[#003354] group-hover:bg-[#003354] group-hover:text-white transition-colors">
                 <Package size={24} />
               </div>
             </div>
@@ -85,10 +86,10 @@ const Dashboard = () => {
           <div onClick={() => navigate('/inventory', { state: { filter: 'low' } })} className="cursor-pointer p-6 bg-white rounded-[24px] border border-[#ecf0f1] shadow-sm hover:border-[#e74c3c] transition-all group">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-black uppercase text-[#95a5a6]">Low Stock Items</p>
-                <h2 className={`text-3xl font-black mt-1 ${stats.lowStock > 0 ? 'text-[#e74c3c]' : 'text-[#2c3e50]'}`}>{stats.lowStock}</h2>
+                <p className="text-[10px] font-black capitalize text-[#95a5a6] tracking-wider">Low Stock Items</p>
+                <h2 className={`text-3xl font-black mt-1 ${stats.lowStock > 0 ? 'text-[#e74c3c]' : 'text-[#003354]'}`}>{stats.lowStock}</h2>
               </div>
-              <div className="p-3 rounded-2xl bg-[#e74c3c] bg-opacity-10 text-[#e74c3c] group-hover:bg-[#e74c3c] group-hover:text-white transition-colors">
+              <div className="p-3 rounded-2xl bg-[#e74c3c]/5 text-[#e74c3c] group-hover:bg-[#e74c3c] group-hover:text-white transition-colors">
                 <AlertTriangle size={24} />
               </div>
             </div>
@@ -97,31 +98,30 @@ const Dashboard = () => {
           <div onClick={() => navigate('/categories')} className="cursor-pointer p-6 bg-white rounded-[24px] border border-[#ecf0f1] shadow-sm hover:border-[#27ae60] transition-all group">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-black uppercase text-[#95a5a6]">Total Categories</p>
+                <p className="text-[10px] font-black capitalize text-[#95a5a6] tracking-wider">Total Categories</p>
                 <h2 className="text-3xl font-black text-slate-900 mt-1">{stats.totalCategories}</h2>
               </div>
-              <div className="p-3 rounded-2xl bg-[#27ae60] bg-opacity-10 text-[#27ae60] group-hover:bg-[#27ae60] group-hover:text-white transition-colors">
+              <div className="p-3 rounded-2xl bg-[#27ae60]/5 text-[#27ae60] group-hover:bg-[#27ae60] group-hover:text-white transition-colors">
                 <Tags size={24} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* --- GRAPHS SECTION --- */}
+        {/* GRAPHS SECTION - Updated: Removed uppercase from titles */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 bg-white rounded-[32px] p-8 border border-[#ecf0f1] shadow-sm min-h-[450px] flex flex-col">
-  <h3 className="text-sm font-black uppercase text-[#2c3e50] mb-6 text-center tracking-widest">
-    Stock Level Analysis
-  </h3>
-  
-  {/* Added a relative wrapper with explicit height to fix the -1 width/height warning */}
-  <div className="relative w-full h-[320px] min-h-0">
+            <h3 className="text-sm font-black capitalize text-[#003354] mb-6 text-center tracking-widest">
+              Stock Level Analysis
+            </h3>
+            
+            <div className="relative w-full h-[320px] min-h-0">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorStock" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#003354" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#003354" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -130,20 +130,19 @@ const Dashboard = () => {
                   <Tooltip 
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   />
-                  <Area type="monotone" dataKey="quantity" stroke="#2563eb" fill="url(#colorStock)" strokeWidth={3} />
+                  <Area type="monotone" dataKey="quantity" stroke="#003354" fill="url(#colorStock)" strokeWidth={3} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           <div className="lg:col-span-4 bg-white rounded-[32px] p-8 border border-[#ecf0f1] shadow-sm min-h-[450px] flex flex-col">
-  <h3 className="text-sm font-black uppercase text-[#2c3e50] mb-6 text-center tracking-widest">
-    Category Distribution
-  </h3>
-  
-  {/* Added a relative wrapper with explicit height */}
-  <div className="relative w-full h-[320px] min-h-0">
-    <ResponsiveContainer width="100%" height="100%">
+            <h3 className="text-sm font-black capitalize text-[#003354] mb-6 text-center tracking-widest">
+              Category Distribution
+            </h3>
+            
+            <div className="relative w-full h-[320px] min-h-0">
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie 
                     data={categoryData} 
@@ -151,8 +150,6 @@ const Dashboard = () => {
                     outerRadius={80} 
                     paddingAngle={5} 
                     dataKey="value"
-                    animationBegin={0}
-                    animationDuration={800}
                   >
                     {categoryData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

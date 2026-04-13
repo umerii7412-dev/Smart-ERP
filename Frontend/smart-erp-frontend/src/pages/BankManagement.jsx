@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Layout from '../components/Layout';
 import api from '../api';
-import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { Landmark, Plus, Settings2, Save, X, Trash2, Loader2 } from 'lucide-react';
 
 const BankManagement = () => {
@@ -18,7 +18,14 @@ const BankManagement = () => {
       const res = await api.get('/Bank');
       setBanks(res.data || []);
     } catch (err) {
-      toast.error("Banks loading Failed!");
+      Swal.fire({
+        title: 'Error',
+        text: 'Banks loading Failed!',
+        icon: 'error',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
     } finally {
       setLoading(false);
     }
@@ -31,11 +38,25 @@ const BankManagement = () => {
       const bankData = banks.find(b => b.id === id);
       const payload = { ...bankData, taxPercentage: parseFloat(tempTax) };
       await api.put(`/Bank/${id}`, payload);
-      toast.success("Tax Rate Updated!");
+      Swal.fire({
+        title: 'Updated!',
+        text: 'Tax Rate Updated Successfully!',
+        icon: 'success',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
       setEditingTaxId(null);
       fetchBanks();
     } catch (err) {
-      toast.error("Update failed!");
+      Swal.fire({
+        title: 'Failed',
+        text: 'Update failed!',
+        icon: 'error',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
     }
   };
 
@@ -47,13 +68,63 @@ const BankManagement = () => {
         currentBalance: parseFloat(newBank.currentBalance),
         taxPercentage: parseFloat(newBank.taxPercentage)
       });
-      toast.success("Bank Added Successfully!");
+      Swal.fire({
+        title: 'Success!',
+        text: 'Bank Added Successfully!',
+        icon: 'success',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
       setShowAddModal(false);
       setNewBank({ bankName: '', taxPercentage: 0, currentBalance: 0 });
       fetchBanks();
     } catch (err) {
-      toast.error("Error adding bank");
+      Swal.fire({
+        title: 'Error',
+        text: 'Error adding bank',
+        icon: 'error',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
     }
+  };
+
+  const handleDeleteBank = async (bank) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Delete "${bank.bankName}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#003354',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await api.delete(`/Bank/${bank.id}`);
+          Swal.fire({
+            title: 'Deleted!',
+            text: 'Bank deleted successfully.',
+            icon: 'success',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
+          fetchBanks();
+        } catch (err) {
+          Swal.fire({
+            title: 'Error',
+            text: 'Delete failed!',
+            icon: 'error',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
+        }
+      }
+    });
   };
 
   if (loading) return <Layout><div className="flex h-[60vh] items-center justify-center"><Loader2 className="animate-spin text-[#003354]" size={40}/></div></Layout>;
@@ -61,21 +132,19 @@ const BankManagement = () => {
   return (
     <Layout>
       <div className="space-y-8">
-        {/* Header Section */}
         <div className="flex justify-between items-center bg-white p-8 rounded-[32px] shadow-sm border border-[#ecf0f1]">
           <div>
-            <h1 className="text-2xl font-black text-[#003354] tracking-tight uppercase">Payment Methods</h1>
-            <p className="text-[#95a5a6] font-bold text-[10px] tracking-widest mt-1 uppercase opacity-80">Manage banks and tax rates</p>
+            <h1 className="text-2xl font-black text-[#003354] tracking-tight">Payment Methods</h1>
+            <p className="text-[#95a5a6] font-bold text-[10px] tracking-widest mt-1 capitalize opacity-80">Manage banks and tax rates</p>
           </div>
           <button 
             onClick={() => setShowAddModal(true)} 
-            className="bg-[#003354] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-lg shadow-slate-200 uppercase tracking-widest text-[10px] transition-all hover:opacity-90 active:scale-95"
+            className="bg-[#003354] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-lg shadow-slate-200 capitalize tracking-wide text-[13px] transition-all hover:opacity-90 active:scale-95"
           >
             <Plus size={18} /> Add New Bank
           </button>
         </div>
 
-        {/* Bank Cards Grid - Updated to 4 columns for smaller cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {banks.map((bank) => (
             <div key={bank.id} className="bg-white p-6 rounded-[32px] relative group border border-[#ecf0f1] shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1 overflow-hidden">
@@ -84,20 +153,20 @@ const BankManagement = () => {
                   <Landmark size={22} />
                 </div>
                 <button 
-                  onClick={async () => { if(window.confirm("Delete this bank?")) { await api.delete(`/Bank/${bank.id}`); fetchBanks(); } }} 
+                  onClick={() => handleDeleteBank(bank)} 
                   className="p-1.5 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
                 >
                   <Trash2 size={18} />
                 </button>
               </div>
 
-              <h3 className="text-lg font-black text-[#2c3e50] uppercase mb-4 tracking-tight truncate" title={bank.bankName}>
+              <h3 className="text-lg font-black text-[#2c3e50] mb-4 tracking-tight truncate" title={bank.bankName}>
                 {bank.bankName}
               </h3>
               
               <div className="p-4 bg-[#f5f7fa]/50 rounded-[22px] border border-[#ecf0f1]/50">
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-black text-[#95a5a6] uppercase tracking-widest">Tax Rate</span>
+                  <span className="text-[9px] font-black text-[#95a5a6] capitalize tracking-widest">Tax Rate</span>
                   {editingTaxId === bank.id ? (
                     <div className="flex items-center gap-1">
                       <input 
@@ -126,20 +195,19 @@ const BankManagement = () => {
           ))}
         </div>
 
-        {/* Add Modal */}
         {showAddModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-6">
             <div className="bg-white rounded-[40px] overflow-hidden w-full max-w-lg shadow-2xl">
               <div className="p-8 bg-[#003354] text-white flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-black uppercase tracking-widest">New Method</h3>
-                  <p className="text-slate-400 text-[10px] font-bold mt-1 uppercase">Enter bank account details</p>
+                  <h3 className="text-lg font-black tracking-widest">New Method</h3>
+                  <p className="text-slate-400 text-[10px] font-bold mt-1 capitalize">Enter bank account details</p>
                 </div>
                 <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all"><X size={24} /></button>
               </div>
               <form onSubmit={handleAddBank} className="p-10 space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em] ml-2">Bank Name</label>
+                  <label className="text-[10px] font-black text-[#95a5a6] capitalize tracking-[0.1em] ml-2">Bank Name</label>
                   <input 
                     required 
                     placeholder="e.g. HBL Account"
@@ -148,7 +216,7 @@ const BankManagement = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em] ml-2">Tax Rate (%)</label>
+                  <label className="text-[10px] font-black text-[#95a5a6] capitalize tracking-[0.1em] ml-2">Tax Rate (%)</label>
                   <input 
                     type="number" 
                     placeholder="0.00"
@@ -156,7 +224,7 @@ const BankManagement = () => {
                     onChange={(e) => setNewBank({...newBank, taxPercentage: e.target.value})} 
                   />
                 </div>
-                <button type="submit" className="w-full bg-[#003354] text-white py-5 rounded-[24px] font-black uppercase tracking-widest text-xs hover:opacity-95 transition-all shadow-xl active:scale-95">
+                <button type="submit" className="w-full bg-[#003354] text-white py-5 rounded-[24px] font-black capitalize tracking-widest text-[13px] hover:opacity-95 transition-all shadow-xl active:scale-95">
                   Confirm & Save Method
                 </button>
               </form>

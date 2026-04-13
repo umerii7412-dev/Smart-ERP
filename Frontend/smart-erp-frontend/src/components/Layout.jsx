@@ -42,10 +42,10 @@ const Layout = ({ children }) => {
 
   return (
     <div className="flex h-screen bg-[#f5f7fa] font-sans">
-      {/* Sidebar - Using #003354 for a professional look */}
+      {/* Sidebar */}
       <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#003354] text-white transition-all duration-300 flex flex-col shadow-2xl z-20`}>
         <div className="p-6 text-xl font-black border-b border-white/10 truncate tracking-wider text-white">
-          {isSidebarOpen ? 'SMART ERP' : 'ERP'}
+          {isSidebarOpen ? 'Smart ERP' : 'ERP'}
         </div>
 
         <nav className="flex-1 mt-6 px-3 space-y-2 overflow-y-auto small-scrollbar">
@@ -60,26 +60,29 @@ const Layout = ({ children }) => {
                 to={item.path}
                 className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group ${
                   isActive
-                  ? 'bg-white text-[#003354] shadow-lg' // Active link becomes white to contrast Navy
+                  ? 'bg-white text-[#003354] shadow-lg'
                   : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <span className={`transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-[#003354]' : 'text-white/50'}`}>
                   {item.icon}
                 </span>
-                {isSidebarOpen && <span className="font-semibold tracking-wide text-[13px] uppercase">{item.name}</span>}
+                {isSidebarOpen && <span className="font-semibold tracking-wide text-[13px] capitalize">{item.name}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <button
-          onClick={handleLogout}
-          className="m-4 p-3 bg-white/5 text-red-400 font-bold rounded-xl hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 border border-white/10 shadow-sm"
-        >
-          <LogOut size={20} />
-          {isSidebarOpen && "Logout"}
-        </button>
+        {/* Logout Button - Sidebar ke bilkul end par aur no hover effect */}
+        <div className="p-4 border-t border-white/10">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-3 p-3 rounded-xl bg-red-600 text-white font-bold transition-none shadow-md"
+          >
+            <LogOut size={20} />
+            {isSidebarOpen && <span className="text-[13px] capitalize">Logout</span>}
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -93,7 +96,7 @@ const Layout = ({ children }) => {
             >
               {isSidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
             </button>
-            <h2 className="hidden md:block text-slate-400 font-medium text-sm tracking-widest uppercase">
+            <h2 className="hidden md:block text-slate-400 font-medium text-sm tracking-widest capitalize">
               System / <span className="text-[#003354] font-black">{location.pathname.replace('/', '') || 'Dashboard'}</span>
             </h2>
           </div>
@@ -101,18 +104,16 @@ const Layout = ({ children }) => {
           <div className="flex items-center gap-4 group cursor-pointer p-1 pr-4 rounded-full hover:bg-slate-50 transition-all">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-[#003354] leading-none">{userName}</p>
-              <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+              <span className="text-[10px] text-slate-400 font-black capitalize tracking-widest">
                 {userRole}
               </span>
             </div>
-            {/* User Avatar with your Main Color */}
             <div className="w-10 h-10 rounded-xl bg-[#003354] flex items-center justify-center text-white font-bold shadow-md group-hover:shadow-lg transition-all text-lg uppercase">
               {userName.charAt(0)}
             </div>
           </div>
         </header>
 
-        {/* Main View Port */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-8 bg-[#f5f7fa]">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {children}
