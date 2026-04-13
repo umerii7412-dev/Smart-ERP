@@ -186,22 +186,22 @@ const UserManagement = () => {
                     {(user.roleName !== 'Admin' && user.role?.name !== 'Admin') ? (
                       <>
                         <button 
-                          onClick={() => handleOpenPermissions(user)}
-                          className="px-4 py-2 rounded-xl text-[11px] font-black bg-[#003354] text-white hover:opacity-90 transition-all shadow-sm"
-                        >
-                          Grant Permission
-                        </button>
-                        
-                        <button 
-                          onClick={() => handleStatusChange(user.userId)}
-                          className={`px-4 py-2 rounded-xl text-[11px] font-black transition-all shadow-sm ${
-                            user.isActive 
-                              ? 'bg-red-600 text-white hover:bg-red-700' 
-                              : 'bg-[#003354] text-white hover:opacity-90'
-                          }`}
-                        >
-                          {user.isActive ? 'Block Access' : 'Unblock Access'}
-                        </button>
+  onClick={() => handleOpenPermissions(user)}
+  className="px-4 py-2 rounded-xl text-[11px] bg-[#003354] text-white hover:opacity-90 transition-all shadow-sm"
+>
+  Grant Permission
+</button>
+
+<button 
+  onClick={() => handleStatusChange(user.userId)}
+  className={`px-4 py-2 rounded-xl text-[11px] transition-all shadow-sm ${
+    user.isActive 
+      ? 'bg-red-600 text-white hover:bg-red-700' 
+      : 'bg-[#003354] text-white hover:opacity-90'
+  }`}
+>
+  {user.isActive ? 'Block Access' : 'Unblock Access'}
+</button>
                       </>
                     ) : (
                       <span className="text-slate-300 text-[11px] font-black italic px-4">
