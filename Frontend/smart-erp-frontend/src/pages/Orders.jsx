@@ -130,19 +130,19 @@ const Orders = () => {
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-[#ecf0f1] overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-[#003354] text-white font-bold text-sm">
-              <tr>
-                <th className="p-6">ID</th>
-                <th className="p-6">Customer</th>
-                <th className="p-6">Total Amount</th>
-                <th className="p-6 text-center">Invoice</th>
+            <thead className="bg-[#003354] text-white">
+              <tr className="text-[12px] font-bold capitalize tracking-wider">
+                <th className="p-6 border-b border-white/10">ID</th>
+                <th className="p-6 border-b border-white/10">Customer</th>
+                <th className="p-6 border-b border-white/10">Total Amount</th>
+                <th className="p-6 text-center border-b border-white/10">Invoice</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[#ecf0f1]">
               {orders.map(order => (
-                <tr key={order.id} className="border-b hover:bg-slate-50 transition-colors">
+                <tr key={order.id} className="hover:bg-[#f5f7fa]/50 transition-colors text-sm">
                   <td className="p-5 font-bold">#ORD-{order.id}</td>
                   <td className="p-5">{order.customerName}</td>
                   <td className="p-5 font-bold text-lg">{parseFloat(order.totalAmount).toLocaleString()}</td>
@@ -225,6 +225,12 @@ const Orders = () => {
                         <option value="">Select Product</option>
                         {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
+                      <div className="min-w-[86px] text-right leading-tight">
+                        <div className="text-[10px] font-bold text-slate-400">Price</div>
+                        <div className="text-xs font-extrabold text-[#003354]">
+                          {Number(item.unitPrice || 0).toLocaleString()}
+                        </div>
+                      </div>
                       <input 
                         type="number" 
                         className="w-16 rounded-lg p-1 text-center border font-bold" 
