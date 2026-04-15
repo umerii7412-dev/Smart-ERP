@@ -73,4 +73,9 @@ export const deleteCustomer = (id) => api.delete(`/Customers/${id}`);
 // --- Inventory ---
 export const getInventory = () => api.get('/Inventory');
 
+// Expenses API Functions
+export const getAllExpenses = (options = {}) => api.get('/Expense', options);
+export const addExpense = (data) => api.post('/Expense', data);
+export const updateExpense = (id, data) => api.put(`/Expense/${id}`, data);
+
 export default api;
