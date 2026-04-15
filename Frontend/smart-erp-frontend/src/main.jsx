@@ -4,7 +4,7 @@ import App from './App.jsx'
 import './index.css' // Yeh line hona zaroori hai
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  /* <React.StrictMode> */
+     <App />
+  /* </React.StrictMode> */
 )

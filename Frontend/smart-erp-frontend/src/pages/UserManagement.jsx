@@ -23,30 +23,41 @@ const UserManagement = () => {
   const currentUserRole = localStorage.getItem('role');
   const isAdmin = currentUserRole === 'Admin';
 
-  useEffect(() => {
-    loadUsers();
-    loadRoles();
-  }, []);
+ useEffect(() => {
+  const controller = new AbortController();
+  const signal = controller.signal;
 
-  const loadUsers = async () => {
-    try {
-      const res = await getAllUsers();
-      setUsers(res.data);
-    } catch (err) {
-      Swal.fire('Error', 'Users loading Error!', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Dono functions ko signal pass karein
+  loadUsers(signal);
+  loadRoles(signal);
 
-  const loadRoles = async () => {
-    try {
-      const res = await getAllBaseRoles();
-      setRoles(res.data);
-    } catch (err) {
-      console.error("Roles fetch error");
-    }
+  return () => {
+    controller.abort(); // Cleanup function: purani requests cancel karega
   };
+}, []);
+
+ const loadUsers = async (signal) => {
+  try {
+    const res = await getAllUsers({ signal }); // API call mein signal bhejain
+    setUsers(res.data);
+  } catch (err) {
+    if (err.name === 'CanceledError' || err.name === 'AbortError') return;
+    Swal.fire('Error', 'Users loading Error!', 'error');
+  } finally {
+    // Ye check zaroori hai taake unmounted component par state update na ho
+    if (!signal.aborted) setLoading(false);
+  }
+};
+
+const loadRoles = async (signal) => {
+  try {
+    const res = await getAllBaseRoles({ signal });
+    setRoles(res.data);
+  } catch (err) {
+    if (err.name === 'CanceledError' || err.name === 'AbortError') return;
+    console.error("Roles fetch error");
+  }
+};
 
   const handleOpenPermissions = async (user) => {
     setTargetUser(user);

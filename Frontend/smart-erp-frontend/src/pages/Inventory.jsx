@@ -16,28 +16,37 @@ const Inventory = () => {
   const [newProduct, setNewProduct] = useState({ name: '', categoryId: '', price: '', stockQuantity: '' });
   const [categories, setCategories] = useState([]); 
 
-  useEffect(() => {
-    fetchInventory();
-    fetchCategories();
-  }, []);
+ useEffect(() => {
+  const controller = new AbortController(); // Naya controller banayein
+  
+  fetchInventory(controller.signal); // Signal ke sath call karein
+   // Categories choti hoti hain, par inka bhi yahi tareeka hai
 
-  const fetchInventory = async () => {
-    try {
-      const response = await api.get('/Inventory');
-      setProducts(response.data);
-    } catch (error) {
-      Swal.fire({
-        title: 'Error',
-        text: "Data Not Loaded!",
-        icon: 'error',
-        timer: 3000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      });
-    } finally {
-      setLoading(false);
-    }
+  return () => {
+    controller.abort(); // Cleanup: Purani call cancel kar dega
   };
+}, []);
+
+ const fetchInventory = async (signal) => {
+  try {
+    const response = await api.get('/Inventory', { signal }); // Signal pass karein
+    setProducts(response.data);
+  } catch (error) {
+    if (error.name === 'CanceledError' || error.name === 'AbortError') {
+      // Agar request cancel hui hai to error mat dikhayein
+      return;
+    }
+    Swal.fire({
+      title: 'Error',
+      text: "Data Not Loaded!",
+      icon: 'error',
+      timer: 3000,
+      showConfirmButton: false
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchCategories = async () => {
     try {
