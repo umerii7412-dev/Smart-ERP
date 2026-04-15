@@ -82,7 +82,7 @@ const ExpenseManagement = () => {
                   </td>
                   
                   {/* 2. Description Column */}
-                  <td className="p-6 text-[11px] text-[#95a5a6] font-bold uppercase">
+                  <td className="p-6 text-[11px] text-[#95a5a6] font-bold ">
                     {exp.description || '---'}
                   </td>
 
