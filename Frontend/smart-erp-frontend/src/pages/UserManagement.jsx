@@ -23,41 +23,59 @@ const UserManagement = () => {
   const currentUserRole = localStorage.getItem('role');
   const isAdmin = currentUserRole === 'Admin';
 
- useEffect(() => {
-  const controller = new AbortController();
-  const signal = controller.signal;
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-  // Dono functions ko signal pass karein
-  loadUsers(signal);
-  loadRoles(signal);
+    loadUsers(signal);
+    loadRoles(signal);
 
-  return () => {
-    controller.abort(); // Cleanup function: purani requests cancel karega
+    return () => {
+      controller.abort(); 
+    };
+  }, []);
+
+  const loadUsers = async (signal) => {
+    try {
+      const res = await getAllUsers({ signal }); 
+      setUsers(res.data);
+    } catch (err) {
+      if (err.name === 'CanceledError' || err.name === 'AbortError') return;
+      Swal.fire('Error', 'Users loading Error!', 'error');
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
   };
-}, []);
 
- const loadUsers = async (signal) => {
-  try {
-    const res = await getAllUsers({ signal }); // API call mein signal bhejain
-    setUsers(res.data);
-  } catch (err) {
-    if (err.name === 'CanceledError' || err.name === 'AbortError') return;
-    Swal.fire('Error', 'Users loading Error!', 'error');
-  } finally {
-    // Ye check zaroori hai taake unmounted component par state update na ho
-    if (!signal.aborted) setLoading(false);
-  }
-};
+  const loadRoles = async (signal) => {
+    try {
+      const res = await getAllBaseRoles({ signal });
+      setRoles(res.data);
+    } catch (err) {
+      if (err.name === 'CanceledError' || err.name === 'AbortError') return;
+      console.error("Roles fetch error");
+    }
+  };
 
-const loadRoles = async (signal) => {
-  try {
-    const res = await getAllBaseRoles({ signal });
-    setRoles(res.data);
-  } catch (err) {
-    if (err.name === 'CanceledError' || err.name === 'AbortError') return;
-    console.error("Roles fetch error");
-  }
-};
+  // --- NAYA FUNCTION: Confirmation Alert ---
+  const confirmStatusChange = (user) => {
+    const actionText = user.isActive ? 'Block' : 'Unblock';
+    
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you really want to ${actionText} ${user.name}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: user.isActive ? '#e74c3c' : '#003354',
+      cancelButtonColor: '#95a5a6',
+      confirmButtonText: `Yes, ${actionText} it!`,
+      cancelButtonText: 'No, Keep it'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleStatusChange(user.userId); // Agar 'Yes' click kia tu status change hoga
+      }
+    });
+  };
 
   const handleOpenPermissions = async (user) => {
     setTargetUser(user);
@@ -197,22 +215,22 @@ const loadRoles = async (signal) => {
                     {(user.roleName !== 'Admin' && user.role?.name !== 'Admin') ? (
                       <>
                         <button 
-  onClick={() => handleOpenPermissions(user)}
-  className="px-4 py-2 rounded-xl text-[11px] bg-[#003354] text-white hover:opacity-90 transition-all shadow-sm"
->
-  Grant Permission
-</button>
+                          onClick={() => handleOpenPermissions(user)}
+                          className="px-4 py-2 rounded-xl text-[11px] bg-[#003354] text-white hover:opacity-90 transition-all shadow-sm"
+                        >
+                          Grant Permission
+                        </button>
 
-<button 
-  onClick={() => handleStatusChange(user.userId)}
-  className={`px-4 py-2 rounded-xl text-[11px] transition-all shadow-sm ${
-    user.isActive 
-      ? 'bg-red-600 text-white hover:bg-red-700' 
-      : 'bg-[#003354] text-white hover:opacity-90'
-  }`}
->
-  {user.isActive ? 'Block Access' : 'Unblock Access'}
-</button>
+                        <button 
+                          onClick={() => confirmStatusChange(user)} // <-- UPDATE: Yahan alert wala function call kia
+                          className={`px-4 py-2 rounded-xl text-[11px] transition-all shadow-sm ${
+                            user.isActive 
+                              ? 'bg-red-600 text-white hover:bg-red-700' 
+                              : 'bg-[#003354] text-white hover:opacity-90'
+                          }`}
+                        >
+                          {user.isActive ? 'Block Access' : 'Unblock Access'}
+                        </button>
                       </>
                     ) : (
                       <span className="text-slate-300 text-[11px] font-black italic px-4">
@@ -226,6 +244,7 @@ const loadRoles = async (signal) => {
           </table>
         </div>
 
+        {/* Permissions Modal */}
         {isPermModalOpen && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
             <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden">
@@ -274,6 +293,7 @@ const loadRoles = async (signal) => {
           </div>
         )}
 
+        {/* Add User Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden">
