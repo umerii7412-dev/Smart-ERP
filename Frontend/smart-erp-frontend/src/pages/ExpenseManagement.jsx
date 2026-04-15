@@ -8,12 +8,11 @@ const ExpenseManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   
-  // Model ke mutabiq state (Date add kar di hai)
   const [newExpense, setNewExpense] = useState({
     title: '',
     amount: '',
     description: '',
-    date: new Date().toISOString().split('T')[0] // Aaj ki date default rakhi hai
+    date: new Date().toISOString().split('T')[0]
   });
 
   useEffect(() => {
@@ -77,22 +76,32 @@ const ExpenseManagement = () => {
             <tbody className="divide-y divide-slate-50">
               {expenses.map((exp) => (
                 <tr key={exp.id} className="hover:bg-slate-50 transition-all border-b border-[#ecf0f1]">
-                  <td className="p-6 text-[11px] text-slate-500 font-black">
-                    {new Date(exp.date).toLocaleDateString('en-GB')} {/* Format: DD/MM/YYYY */}
-                  </td>
+                  {/* 1. Title Column */}
                   <td className="p-6 font-semibold text-[#2c3e50]">
                     {exp.title}
                   </td>
+                  
+                  {/* 2. Description Column */}
                   <td className="p-6 text-[11px] text-[#95a5a6] font-bold uppercase">
                     {exp.description || '---'}
                   </td>
-                  <td className="p-6 text-center font-bold text-[#003354]">
+
+                  {/* 3. Amount Column */}
+                  <td className="p-6 font-bold text-[#003354]">
                     {Number(exp.amount).toLocaleString()}
+                  </td>
+
+                  {/* 4. Date Column */}
+                  <td className="p-6 text-center text-[11px] text-slate-500 font-black">
+                    {new Date(exp.date).toLocaleDateString('en-GB')} {/* Format: DD/MM/YYYY */}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {expenses.length === 0 && !loading && (
+            <div className="p-10 text-center text-slate-400 font-medium">No expenses found.</div>
+          )}
         </div>
 
         {showModal && (
