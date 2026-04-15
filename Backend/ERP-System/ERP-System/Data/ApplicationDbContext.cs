@@ -25,6 +25,7 @@ namespace ERP.API.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<BankTransaction> BankTransactions { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Expense> Expenses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

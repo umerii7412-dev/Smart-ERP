@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ERP_System.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalERPFix : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -55,6 +55,22 @@ namespace ERP_System.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Customers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Expenses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Expenses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -370,7 +386,7 @@ namespace ERP_System.Migrations
                 {
                     { 1, "Full System Access", "Admin" },
                     { 2, "Management and Reports Access", "Manager" },
-                    { 3, "Limited Operational Access", "Employee" }
+                    { 3, "Limited Operational Access", "HR" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -463,6 +479,9 @@ namespace ERP_System.Migrations
 
             migrationBuilder.DropTable(
                 name: "BankTransactions");
+
+            migrationBuilder.DropTable(
+                name: "Expenses");
 
             migrationBuilder.DropTable(
                 name: "Leaves");

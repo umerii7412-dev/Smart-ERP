@@ -20,7 +20,7 @@ const Inventory = () => {
   const controller = new AbortController(); // Naya controller banayein
   
   fetchInventory(controller.signal); // Signal ke sath call karein
-   // Categories choti hoti hain, par inka bhi yahi tareeka hai
+  fetchCategories(controller.signal);
 
   return () => {
     controller.abort(); // Cleanup: Purani call cancel kar dega
@@ -29,7 +29,7 @@ const Inventory = () => {
 
  const fetchInventory = async (signal) => {
   try {
-    const response = await api.get('/Inventory', { signal }); // Signal pass karein
+    const response = await api.get('/Inventory', signal ? { signal } : undefined);
     setProducts(response.data);
   } catch (error) {
     if (error.name === 'CanceledError' || error.name === 'AbortError') {
@@ -48,9 +48,9 @@ const Inventory = () => {
   }
 };
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (signal) => {
     try {
-      const response = await api.get('/Category');
+      const response = await api.get('/Category', signal ? { signal } : undefined);
       setCategories(response.data);
     } catch (error) {
       console.error("Categories Not Loaded");
