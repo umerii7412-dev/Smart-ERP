@@ -13,6 +13,7 @@ import UserManagement from './pages/UserManagement';
 import BankManagement from './pages/BankManagement';
 // ✅ New Page Import
 import RolesPermissions from './pages/RolesPermissions'; 
+import ExpenseManagement from './pages/ExpenseManagement';
 
 // ✅ Protected Route: Wahi logic jo aapne provide ki
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -42,12 +43,15 @@ function App() {
         <Route path="/customers" element={<ProtectedRoute><CustomerManagement /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
         
+        {/* ✅ Naya Expense Route Add Kiya */}
+        <Route path="/expenses" element={<ProtectedRoute><ExpenseManagement /></ProtectedRoute>} />
+        
         {/* Admin Only Routes */}
         <Route path="/reporting" element={<ProtectedRoute adminOnly={true}><Reporting /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute adminOnly={true}><UserManagement /></ProtectedRoute>} />
         <Route path="/bank" element={<ProtectedRoute adminOnly={true}><BankManagement /></ProtectedRoute>} />
         
-        {/* ✅ Updated Roles Route: Div ki jagah ab proper component use ho raha hai */}
+        {/* ✅ Updated Roles Route */}
         <Route 
           path="/roles" 
           element={

@@ -12,7 +12,8 @@ import {
   BarChart3,
   LogOut,
   ChevronLeft,
-  Menu
+  Menu,
+  Wallet // Naya icon import kiya
 } from 'lucide-react';
 
 const Layout = ({ children }) => {
@@ -35,6 +36,7 @@ const Layout = ({ children }) => {
     { name: 'Bank', path: '/bank', icon: <Landmark size={22} />, adminOnly: true },
     { name: 'Inventory', path: '/inventory', icon: <Package size={22} />, adminOnly: false },
     { name: 'Categories', path: '/categories', icon: <Tags size={22} />, adminOnly: false }, 
+    { name: 'Expenses', path: '/expenses', icon: <Wallet size={22} />, adminOnly: false }, // <-- Yahan add kiya
     { name: 'Customers', path: '/customers', icon: <Users size={22} />, adminOnly: false },
     { name: 'Orders', path: '/orders', icon: <ShoppingBag size={22} />, adminOnly: false },
     { name: 'Reporting', path: '/reporting', icon: <BarChart3 size={22} />, adminOnly: true },
@@ -73,7 +75,7 @@ const Layout = ({ children }) => {
           })}
         </nav>
 
-        {/* Logout Button - Sidebar ke bilkul end par aur no hover effect */}
+        {/* Logout Button */}
         <div className="p-4 border-t border-white/10">
           <button
             onClick={handleLogout}
